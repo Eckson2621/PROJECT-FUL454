@@ -455,7 +455,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
     for(const n of nodes){const v=n.nodeValue;if(v&&v.trim()){const lead=v.match(/^\s*/)?.[0]||'',tail=v.match(/\s*$/)?.[0]||'';const core=v.trim();if(translations[core]||exact(core)!==core)n.nodeValue=lead+exact(core)+tail;}}
     if(root.querySelectorAll)root.querySelectorAll('input[placeholder],textarea[placeholder],img[alt],button[aria-label],*[title]').forEach(el=>{
-      ['placeholder','alt','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(v&&translations[v])el.setAttribute(a,translations[v])});
+      ['placeholder','alt','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(v&&exact(v)!==v)el.setAttribute(a,exact(v))});
     });
   }
   function translateDialogs(){
@@ -464,21 +464,43 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
     window.confirm=function(m){return c.call(this,exact(String(m)))};
     window.prompt=function(m,d){return p.call(this,exact(String(m)),d)};
   }
-  function start(){
-    document.documentElement.lang='en';
-    document.title='FUL454 — Find. Discover. Connect.';
-    const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=translations[meta.content]||'Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.';
-    const toggle=document.getElementById('languageToggle');if(toggle)toggle.remove();
+  function updateLanguageButton(){
+    const button=document.getElementById('languageToggle');
+    if(button){
+      button.textContent=currentLang()==='en'?'Kiswahili':'English';
+      button.setAttribute('aria-label',currentLang()==='en'?'Switch language to Kiswahili':'Switch language to English');
+      button.title=button.getAttribute('aria-label');
+    }
+  }
+  function switchLanguage(){
+    fulLanguage=currentLang()==='en'?'sw':'en';
+    try{localStorage.setItem('ful454_language',fulLanguage)}catch(e){}
+    document.documentElement.lang=fulLanguage;
     walk(document.body);
+    updateLanguageButton();
+  }
+  function start(){
+    try{fulLanguage=localStorage.getItem('ful454_language')||'en'}catch(e){fulLanguage='en'}
+    if(fulLanguage!=='sw'&&fulLanguage!=='en')fulLanguage='en';
+    document.documentElement.lang=fulLanguage;
+    document.title='FUL454 — Find. Discover. Connect.';
+    const meta=document.querySelector('meta[name="description"]');
+    if(meta)meta.content=fulLanguage==='en'?'Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.':'Tafuta na gundua nyumba, viwanja, vyumba, majengo ya biashara na biashara Tanzania.';
+    walk(document.body);
+    updateLanguageButton();
+    window.toggleLanguage=switchLanguage;
+    window.applyLanguage=function(){document.documentElement.lang=currentLang();walk(document.body);updateLanguageButton()};
     new MutationObserver(records=>records.forEach(rec=>{
-      if(rec.type==='childList')rec.addedNodes.forEach(n=>{if(n.nodeType===Node.TEXT_NODE){const v=n.nodeValue;if(v&&exact(v.trim())!==v.trim())n.nodeValue=v.replace(v.trim(),exact(v.trim()));}else if(n.nodeType===Node.ELEMENT_NODE)walk(n)});
-      else if(rec.type==='characterData'){const v=rec.target.nodeValue;if(v&&exact(v.trim())!==v.trim())rec.target.nodeValue=v.replace(v.trim(),exact(v.trim()));}
+      if(rec.type==='childList')rec.addedNodes.forEach(n=>{
+        if(n.nodeType===Node.TEXT_NODE){const v=n.nodeValue;if(v&&exact(v.trim())!==v.trim())n.nodeValue=v.replace(v.trim(),exact(v.trim()))}
+        else if(n.nodeType===Node.ELEMENT_NODE)walk(n);
+      });
+      else if(rec.type==='characterData'){const v=rec.target.nodeValue;if(v&&exact(v.trim())!==v.trim())rec.target.nodeValue=v.replace(v.trim(),exact(v.trim()))}
     })).observe(document.body,{subtree:true,childList:true,characterData:true});
-    translateDialogs();
-    if(typeof fulLanguage!=='undefined'){fulLanguage='en';try{localStorage.setItem('ful454_language','en')}catch{}}
-    if(typeof applyLanguage==='function')applyLanguage();
-    document.documentElement.lang='en';
-    const toggleAgain=document.getElementById('languageToggle');if(toggleAgain)toggleAgain.remove();
+    const originalAlert=window.alert,originalConfirm=window.confirm,originalPrompt=window.prompt;
+    window.alert=function(m){return originalAlert.call(this,exact(String(m)))};
+    window.confirm=function(m){return originalConfirm.call(this,exact(String(m)))};
+    window.prompt=function(m,d){return originalPrompt.call(this,exact(String(m)),d)};
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

@@ -136,6 +136,22 @@ footer{background:linear-gradient(105deg,#171744,#4935a8 60%,#176d83);color:#e2e
 .analytics-empty{padding:18px;border-radius:12px;background:#f4f3ff;color:#666887;font-size:13px}
 @media(max-width:700px){.admin-analytics{grid-template-columns:1fr}.analytics-card{padding:16px}.analytics-donut-wrap{gap:14px}}
 
+
+/* FUL454 Owner-only analytics dashboard */
+.owner-analytics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:12px 0}
+.owner-analytics .analytics-card{background:linear-gradient(145deg,#fff,#f5f4ff);border:1px solid #deddf6;border-radius:18px;padding:18px;min-width:0;box-shadow:0 12px 30px rgba(48,42,120,.08)}
+.owner-analytics .analytics-card h3{margin:0 0 5px;font-size:16px;color:#252453}
+.owner-analytics .analytics-sub{color:#777795;font-size:12px;margin:0 0 14px}
+.owner-analytics .analytics-metric{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eeedf7}
+.owner-analytics .analytics-metric:last-child{border-bottom:0}
+.owner-analytics .analytics-metric strong{font-size:22px;color:#252453}
+.owner-analytics .analytics-bar-row{margin:12px 0}
+.owner-analytics .analytics-bar-label{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:6px;color:#555575}
+.owner-analytics .analytics-track{height:10px;border-radius:99px;background:#eeedf8;overflow:hidden}
+.owner-analytics .analytics-fill{height:100%;border-radius:99px;transition:width .45s ease}
+.owner-analytics .analytics-empty{padding:14px;border-radius:12px;background:#f4f3ff;color:#666887;font-size:13px}
+@media(max-width:700px){.owner-analytics{grid-template-columns:1fr}}
+
 </style></head><body><div id="fulActionToast" role="status" aria-live="polite"></div>
 <header><div class="brand">FUL<span>454</span></div><nav><button onclick="showView('home')">Nyumbani</button><button onclick="showView('browse')">Tafuta</button><button onclick="showView('dashboard')">Dashibodi</button><button onclick="openAuth()">Ingia / Jisajili</button><button class="btn-light" id="languageToggle" onclick="toggleLanguage()">EN</button></nav></header>
 <main class="wrap">
@@ -204,6 +220,7 @@ html+='<div class="notice">'+(status==='pending'?'Akaunti yako inasubiri uthibit
 html+='<p class="muted">Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.</p>';
 }
 html+='</div>';
+if(currentProfile?.account_type==='owner'&&status==='approved')html+='<div class="panel"><h2>Owner Dashboard</h2><p class="muted">Your private listing performance and account activity.</p><div id="ownerAnalytics" class="owner-analytics"><div class="analytics-empty">Loading your analytics...</div></div></div>';
 if(currentProfile?.platform_role==='eam_super_admin')html+='<div class="panel"><h2>SUPER ADMIN — Usimamizi wa FUL454</h2><p class="muted">Simamia wamiliki, madalali, wateja na maombi ya idhini.</p><div id="superAdminStats" class="form-grid"><div class="notice">Inapakia takwimu...</div></div><div class="section-head"><h3>Maombi ya idhini ya wamiliki na madalali</h3></div><div id="accountApprovalQueue">Inapakia maombi...</div><div class="field"><label>Tafuta akaunti kwa jina, email au simu</label><input id="adminAccountSearch" placeholder="Andika jina, email au simu" oninput="filterAdminAccounts()"></div><div id="superAdminAccounts">Inapakia akaunti...</div><div class="section-head"><h3>Muhtasari wa matangazo</h3></div><div id="superAdminListings">Inapakia matangazo...</div><div class="section-head"><h3>Ripoti za biashara</h3></div><div id="businessReport" class="form-grid">Inapakia ripoti...</div><div class="section-head"><h3>Maombi ya kampuni za udalali</h3></div><div id="brokerageQueue">Inapakia kampuni...</div><div class="section-head"><h3>Malipo ya matangazo yanayolipiwa</h3></div><div id="promotionQueue">Inapakia malipo...</div></div>';
 if((currentProfile?.account_type==='owner'&&status==='approved')||currentProfile?.platform_role){
 html+='<div class="panel"><h3>Weka tangazo jipya</h3><div class="form-grid"><div class="field"><label>Kichwa cha tangazo</label><input id="ltitle"></div><div class="field"><label>Kampuni (hiari)</label><select id="listingCompanySelect"><option value="">Akaunti binafsi</option></select></div><div class="field"><label>Aina ya mali</label><select id="ltype"><option value="house">Nyumba</option><option value="room">Chumba</option><option value="plot">Kiwanja</option><option value="commercial_building">Jengo la biashara</option><option value="business">Biashara</option></select></div><div class="field"><label>Madhumuni</label><select id="lpurpose"><option value="sale">Kununua</option><option value="rent">Kupanga</option></select></div><div class="field"><label>Bei (TZS)</label><input id="lprice" type="number" min="1"></div><div class="field"><label>Mkoa</label><input id="lregion"></div><div class="field"><label>Wilaya</label><input id="ldistrict"></div><div class="field"><label>Kata</label><input id="lward"></div><div class="field"><label>Anuani / mtaa</label><input id="laddress"></div><div class="field"><label>Jina la mawasiliano</label><input id="contactName" autocomplete="name"></div><div class="field"><label>Namba ya simu ya mawasiliano</label><input id="contactPhone" type="tel" autocomplete="tel"></div><div class="field"><label>Namba ya WhatsApp (hiari)</label><input id="contactWhatsApp" type="tel"></div><div class="field full"><label>Maelezo</label><textarea id="ldesc" rows="4"></textarea></div><div class="field full"><label>Picha (inapendekezwa, unaweza kuongeza baadae)</label><input id="lphotos" type="file" accept="image/*" multiple></div></div><p><button onclick="createListing()">Tuma tangazo likaguliwe</button></p><div id="listingMsg"></div></div>';
@@ -213,6 +230,7 @@ if(currentProfile?.account_type==='owner'&&status==='approved')html+='<div class
 if(currentProfile?.account_type==='agent'&&status==='approved')html+='<div class="panel"><h3>Maombi yangu ya mawasiliano</h3><div id="agentRequests">Inapakia...</div></div>';
 if(currentProfile?.platform_role==='project_admin'||currentProfile?.platform_role==='eam_super_admin')html+='<div class="panel"><h3>Usimamizi wa matangazo</h3><div id="adminListings">Inapakia...</div></div><div class="panel"><h3>Uthibitisho wa maombi ya mawakala kwa kila tangazo</h3><div id="adminAgentRequests">Inapakia...</div></div>';
 $('dashboardContent').innerHTML=html;
+if(currentProfile?.account_type==='owner'&&status==='approved')loadOwnerAnalytics();
 loadMyListings();
 if(currentProfile?.platform_role==='eam_super_admin'){loadSuperAdminDashboard();loadAdminBusinessReport();loadBrokerageQueue();loadPromotionQueue()}loadUserExtras();
 if(currentProfile?.account_type==='owner'&&status==='approved')loadOwnerAgentRequests();
@@ -264,6 +282,39 @@ function filterAdminAccounts(){
   renderAdminAccounts(adminAccountCache.filter(x=>[x.full_name,x.email,x.phone,x.account_type].some(v=>String(v||'').toLowerCase().includes(q))));
 }
 async function createListing(){if(currentProfile?.account_type==='owner'&&currentProfile?.approval_status!=='approved'&&currentProfile?.platform_role!=='eam_super_admin'){showFulActionToast('Akaunti ya mmiliki lazima ithibitishwe kwanza.',true);return}let title=$('ltitle').value.trim(),price=Number($('lprice').value),region=$('lregion').value.trim(),district=$('ldistrict').value.trim(),description=$('ldesc').value.trim(),contactName=$('contactName').value.trim(),contactPhone=$('contactPhone').value.trim(),contactWhatsApp=$('contactWhatsApp').value.trim();if(title.length<5||title.length>140||!price||price<=0||!region||!district||description.length<20||description.length>5000||!contactName||!contactPhone){$('listingMsg').innerHTML='<div class="notice">Jaza kichwa (herufi 5–140), bei sahihi, mkoa, wilaya, maelezo (herufi 20–5000), jina na simu ya mawasiliano.</div>';return}let files=Array.from($('lphotos').files||[]);if(files.length>8){$('listingMsg').innerHTML='<div class="notice">Weka picha zisizozidi 8 kwa tangazo moja.</div>';return}if(files.some(f=>!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024)){$('listingMsg').innerHTML='<div class="notice">Picha ziwe JPG, PNG au WEBP na kila picha isiwe zaidi ya MB 5.</div>';return}let row={owner_id:currentUser.id,title,property_type:$('ltype').value,listing_purpose:$('lpurpose').value,price,currency_code:'TZS',region,district,ward:$('lward').value.trim()||null,street_address:$('laddress').value.trim()||null,description,status:'pending',brokerage_company_id:$('listingCompanySelect')?.value||null};let {data,error}=await sb.from('property_listings').insert(row).select().single();if(error){$('listingMsg').innerHTML='<div class="notice">'+esc(error.message)+'</div>';return}let warnings=[];let contact=await sb.from('listing_contacts').insert({listing_id:data.id,contact_name:contactName,phone:contactPhone,whatsapp_phone:contactWhatsApp||null});if(contact.error)warnings.push('Mawasiliano hayakuhifadhiwa: '+contact.error.message);for(let i=0;i<files.length;i++){let f=files[i],path=currentUser.id+'/'+data.id+'/'+Date.now()+'-'+i+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),up=await sb.storage.from('ful454-listing-photos').upload(path,f,{upsert:false});if(up.error){warnings.push('Picha '+(i+1)+' haikupakiwa: '+up.error.message);continue}let saved=await sb.from('listing_photos').insert({listing_id:data.id,storage_path:path,sort_order:i});if(saved.error)warnings.push('Taarifa ya picha '+(i+1)+' haikuhifadhiwa: '+saved.error.message)}$('listingMsg').innerHTML='<div class="notice '+(warnings.length?'':'success')+'">'+(warnings.length?'Tangazo limetumwa lakini kuna mambo ya kurekebisha: '+esc(warnings.join(' | ')):'Tangazo, mawasiliano na picha vimetumwa kwa ukaguzi. Litachapishwa baada ya kuidhinishwa.')+'</div>';loadMyListings()}
+
+async function loadOwnerAnalytics(){
+ const el=$('ownerAnalytics');if(!el||!currentUser)return;
+ const [listingRes,promoRes,requestRes]=await Promise.all([
+  sb.from('property_listings').select('id,status,property_type,created_at,is_featured,featured_until').eq('owner_id',currentUser.id).order('created_at',{ascending:false}),
+  sb.from('listing_promotions').select('id,status,amount,created_at,ends_at').eq('owner_id',currentUser.id),
+  sb.from('agent_access_requests').select('id,status,created_at').eq('owner_id',currentUser.id)
+ ]);
+ const errors=[listingRes.error,promoRes.error,requestRes.error].filter(Boolean);
+ if(errors.length){el.innerHTML='<div class="analytics-empty">Could not load all analytics: '+esc(errors.map(e=>e.message).join(' · '))+'</div>';return}
+ const listings=listingRes.data||[],promos=promoRes.data||[],requests=requestRes.data||[];
+ const count=(arr,fn)=>arr.filter(fn).length;
+ const total=listings.length,approved=count(listings,x=>x.status==='approved'),pending=count(listings,x=>x.status==='pending'),rejected=count(listings,x=>x.status==='rejected'),other=total-approved-pending-rejected;
+ const activeFeatured=count(listings,x=>x.is_featured===true&&(!x.featured_until||new Date(x.featured_until)>new Date()));
+ const recent=count(listings,x=>new Date(x.created_at)>=new Date(Date.now()-30*86400000));
+ const paid=count(promos,x=>x.status==='paid'),waiting=count(promos,x=>x.status==='pending');
+ const acceptedRequests=count(requests,x=>['owner_approved','approved'].includes(x.status));
+ const pct=(n,d)=>d?Math.round(n/d*100):0;
+ const bar=(label,n,d,colour)=>'<div class="analytics-bar-row"><div class="analytics-bar-label"><span>'+label+'</span><b>'+n+' · '+pct(n,d)+'%</b></div><div class="analytics-track"><div class="analytics-fill" style="width:'+pct(n,d)+'%;background:'+colour+'"></div></div></div>';
+ const metric=(label,n)=>'<div class="analytics-metric"><span>'+label+'</span><strong>'+n+'</strong></div>';
+ const types=[['Houses', 'house'],['Rooms','room'],['Plots','plot'],['Commercial buildings','commercial_building'],['Businesses','business']];
+ const typeBars=types.map(([label,type])=>bar(label,count(listings,x=>x.property_type===type),total,'#6655d4')).join('');
+ el.innerHTML=
+ '<div class="analytics-card"><h3>My listings</h3><p class="analytics-sub">Only listings created by your account</p>'+
+ metric('Total listings',total)+metric('Approved / published',approved)+metric('Awaiting review',pending)+metric('Rejected',rejected)+metric('Active featured listings',activeFeatured)+metric('New listings · last 30 days',recent)+'</div>'+
+ '<div class="analytics-card"><h3>Listing approval rate</h3><p class="analytics-sub">Status distribution for your listings</p>'+
+ bar('Approved',approved,total,'#159b91')+bar('Pending',pending,total,'#f1b84b')+bar('Rejected',rejected,total,'#d66b72')+(other?bar('Other',other,total,'#8a7be8'):'')+
+ '<p class="analytics-sub">Approval rate: <b>'+pct(approved,total)+'%</b> of all your listings</p></div>'+
+ '<div class="analytics-card"><h3>My listing categories</h3><p class="analytics-sub">Distribution by property type</p>'+(total?typeBars:'<div class="analytics-empty">You have not posted any listings yet.</div>')+'</div>'+
+ '<div class="analytics-card"><h3>Promotions & agent requests</h3><p class="analytics-sub">Activity related only to your properties</p>'+
+ metric('Promotion requests',promos.length)+metric('Promotions verified',paid)+metric('Promotions awaiting review',waiting)+metric('Agent requests received',requests.length)+metric('Agent requests approved by you / admin',acceptedRequests)+'</div>';
+}
+
 async function loadMyListings(){let {data,error}=await sb.from('property_listings').select('id,title,status,price,currency_code,created_at,rejection_reason').eq('owner_id',currentUser.id).order('created_at',{ascending:false});$('myListings').innerHTML=error?esc(error.message):(data||[]).map(x=>'<p><b>'+esc(x.title)+'</b> — '+priceFmt(x.price,x.currency_code)+' · <span class="tag">'+esc(x.status)+'</span>'+(x.rejection_reason?' · '+esc(x.rejection_reason):'')+'</p>').join('')||'Hujaweka tangazo bado.'}
 async function loadAdminListings(){let {data,error}=await sb.from('property_listings').select('id,title,status,owner_id,price,region').eq('status','pending').order('created_at');$('adminListings').innerHTML=error?esc(error.message):(data||[]).map(x=>'<p>'+esc(x.title)+' — '+esc(x.region)+' — '+priceFmt(x.price,'TZS')+' <button onclick="reviewListing(\''+x.id+'\',true)">Idhinisha</button> <button class="btn-light" onclick="reviewListing(\''+x.id+'\',false)">Kataa</button></p>').join('')||'Hakuna matangazo yanayosubiri.'}async function loadOwnerAgentRequests(){let {data,error}=await sb.from('agent_access_requests').select('id,listing_id,agent_id,status,message,created_at,profiles!agent_access_requests_agent_id_fkey(full_name,phone),property_listings!agent_access_requests_listing_id_fkey(title)').eq('owner_id',currentUser.id).order('created_at',{ascending:false});$('ownerAgentRequests').innerHTML=error?esc(error.message):(data||[]).map(r=>'<div class="panel"><b>'+esc(r.property_listings?.title||'Tangazo')+'</b><p>Wakala: '+esc(r.profiles?.full_name||'')+' · '+esc(r.profiles?.phone||'')+'</p><p>Hali: '+esc(r.status)+'</p>'+(r.status==='pending'?'<button onclick="ownerDecideRequest(\''+r.id+'\',true)">Ruhusu</button> <button class="btn-light" onclick="ownerDecideRequest(\''+r.id+'\',false)">Kataa</button>':'')+'</div>').join('')||'Hakuna maombi ya mawakala.'}
 async function ownerDecideRequest(id,approve){let {error}=await sb.from('agent_access_requests').update({status:approve?'owner_approved':'owner_rejected',owner_decided_at:new Date().toISOString()}).eq('id',id);if(error){alert('Uamuzi haujahifadhiwa: '+error.message);return false}await loadOwnerAgentRequests();showFulActionToast(approve?'Umeruhusu wakala kuendelea.':'Umekataa ombi la wakala.');return true}

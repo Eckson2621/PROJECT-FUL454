@@ -336,4 +336,152 @@ async function reviewPromotion(id,approve){if(!currentUser||currentProfile?.plat
 
 sb.auth.getSession().then(async({data})=>{currentUser=data.session?.user||null;if(currentUser){await ensureProfile();await syncSavedListings()}loadPublicListings()});
 sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;currentProfile=null;if(currentUser){await ensureProfile();await syncSavedListings()}});
-</script></body></html>
+</script>
+<script>
+/* FUL454: English-only interface. Keep user-submitted listing content unchanged. */
+(function(){
+  const translations = {
+    "Tafuta na gundua nyumba, viwanja, vyumba, majengo ya biashara na biashara Tanzania.":"Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.",
+    "Nyumbani":"Home","Tafuta":"Browse","Dashibodi":"Dashboard","Ingia / Jisajili":"Login / Sign up",
+    "Mahali sahihi pa kuanza kutafuta.":"The right place to start your search.",
+    "Gundua nyumba, vyumba, viwanja, majengo ya biashara na biashara zinazotangazwa. Tanzania kwanza — dunia nzima mbele.":"Discover listed homes, rooms, plots, commercial buildings and businesses. Tanzania first — the world next.",
+    "Anza kutafuta":"Start browsing","Weka tangazo":"Post a listing",
+    "Unatafuta nini?":"What are you looking for?","Mkoa":"Region","Aina":"Type","Aina zote":"All types","Kiwanja":"Plot","Jengo la biashara":"Commercial building","Madhumuni":"Purpose","Yote":"All","Kununua":"For sale","Kupanga":"For rent",
+    "CHAGUO ZILIZOTHIBITISHWA":"VERIFIED LISTINGS","Matangazo mapya":"Latest listings","Matangazo yaliyoidhinishwa pekee huonekana hapa.":"Only approved listings appear here.","Tazama yote":"View all",
+    "Aina za matangazo":"Listing categories","Nyumba":"House","Vyumba":"Rooms","Viwanja":"Plots","Majengo":"Buildings","Biashara":"Businesses",
+    "JINSI INAVYOFANYA KAZI":"HOW IT WORKS","Rahisi kuanza, rahisi kupata":"Easy to start, easy to find",
+    "Tafuta unachohitaji":"Find what you need","Chagua aina ya mali, eneo na bajeti inayokufaa.":"Choose the property type, location and budget that suit you.",
+    "Chunguza tangazo":"Explore a listing","Soma maelezo na angalia taarifa za mali iliyotangazwa.":"Read the description and review the property details.",
+    "Wasiliana na mwenye mali":"Contact the property owner","Wasiliana moja kwa moja pale taarifa za mawasiliano zinaporuhusiwa.":"Contact the advertiser directly when contact details are available.",
+    "Tafuta matangazo":"Browse listings","Chuja kwa eneo, aina na bei.":"Filter by location, type and price.","Neno la kutafuta":"Search term","Jina au maelezo":"Title or description",
+    "Aina ya mali":"Property type","Zote":"All","Chumba":"Room","Kununua / Kupanga":"Sale / Rent","Bei ya chini (TZS)":"Minimum price (TZS)","Bei ya juu (TZS)":"Maximum price (TZS)",
+    "Tafuta sasa":"Search now","Panga matangazo:":"Sort listings:","Mapya kwanza":"Newest first","Bei: ndogo hadi kubwa":"Price: low to high","Bei: kubwa hadi ndogo":"Price: high to low","★ Niliyohifadhi":"★ Saved listings","Onyesha yote":"Show all",
+    "Dashibodi yangu":"My dashboard","Ingia ili kusimamia akaunti yako.":"Sign in to manage your account.","Toka":"Sign out",
+    "Ingia au jisajili ili kuweka matangazo na kusimamia mali zako.":"Sign in or create an account to post listings and manage your properties.",
+    "Ingia FUL454":"Sign in to FUL454","Akaunti moja ya kutafuta, kutangaza na kusimamia.":"One account to browse, advertise and manage listings.",
+    "Barua pepe":"Email","Nenosiri":"Password","Tengeneza akaunti":"Create account","Jina kamili":"Full name","Namba ya simu":"Phone number","Aina ya akaunti":"Account type","Mteja / Mnunuzi":"Buyer","Mmiliki wa mali":"Property owner","Dalali / Wakala":"Agent","Nenosiri (angalau herufi 8)":"Password (at least 8 characters)","Jisajili":"Sign up","Nina akaunti":"I already have an account",
+    "Maelezo ya tangazo":"Listing details","Funga":"Close","Huduma ya kutafuta na kutangaza mali. FUL454 haihusiki kushikilia fedha za mauziano au upangishaji.":"A platform for finding and advertising properties. FUL454 does not hold funds for sales or rentals.",
+    "Mf. nyumba ya vyumba 3, kiwanja...":"E.g. 3-bedroom house, plot...","Bado hujahifadhi tangazo lolote. Bonyeza ☆ Hifadhi kwenye tangazo unalolipenda.":"You have not saved any listings yet. Select ☆ Save on a listing you like.",
+    "Matangazo uliyohifadhi hayapo tena au yameondolewa.":"Your saved listings are no longer available or have been removed.",
+    "Fungua akaunti":"Create an account","Ingia":"Sign in","Jaza jina, barua pepe na nenosiri lenye angalau herufi 8.":"Enter your name, email address and a password of at least 8 characters.",
+    "Akaunti imefunguliwa. Karibu FUL454.":"Your account has been created. Welcome to FUL454.",
+    "Usajili umepokelewa. Fungua barua pepe yako kuthibitisha akaunti, kisha ingia.":"Your registration has been received. Check your email to verify your account, then sign in.",
+    "Umeingia kikamilifu.":"You have signed in successfully.",
+    "Nyumba":"House","Chumba":"Room","Kiwanja":"Plot","Jengo la biashara":"Commercial building","Biashara":"Business",
+    "TANGAZO LILILOLIPIWA":"FEATURED LISTING","Maelezo / Wasiliana":"Details / Contact","★ Imehifadhiwa":"★ Saved","☆ Hifadhi":"☆ Save",
+    "Imeshindikana kupakia matangazo: ":"Could not load listings: ","Bado hakuna tangazo lililoidhinishwa. Rudi tena baadaye.":"There are no approved listings yet. Please check again later.",
+    "Hakuna tangazo linalolingana na utafutaji wako.":"No listings match your search.",
+    "Imeshindikana kufungua tangazo: ":"Could not open listing: ","Picha ya tangazo":"Listing photo","Eneo":"Location","Imetangazwa":"Listed on","Maelezo ya mali":"Property description",
+    "Hakuna maelezo yaliyowekwa.":"No description provided.","Wasiliana na mtangazaji":"Contact the advertiser","Piga simu":"Call",
+    "Mawasiliano yanalindwa kwa mawakala. Hali ya ombi: ":"Contact details are restricted for agents. Request status: ",
+    "Omba ruhusa ya mawasiliano":"Request access to contact details","Mawasiliano ya mtangazaji hayapatikani kwa sasa.":"The advertiser's contact details are currently unavailable.",
+    "Ingia kwanza kuomba ruhusa.":"Please sign in first to request access.",
+    "Akaunti ya dalali lazima ithibitishwe na Super Admin kabla ya kuomba kazi.":"An agent account must be approved by the Super Admin before requesting assignments.",
+    "Ombi lako lipo tayari: ":"Your request already exists: ","Ombi halikufanikiwa: ":"Request failed: ",
+    "Ombi limetumwa. Mmiliki na msimamizi watakagua kabla ya mawasiliano kufunguliwa.":"Your request has been submitted. The owner and administrator will review it before contact details are shared.",
+    "Tafadhali ingia kwanza.":"Please sign in first.","Inasubiri uthibitisho wa Super Admin":"Awaiting Super Admin approval","Imethibitishwa":"Approved","Ombi limekataliwa":"Request rejected","Akaunti imesitishwa":"Account suspended",
+    "akaunti":"account","Akaunti yangu":"My account","Hali ya idhini:":"Approval status:",
+    "Akaunti yako inasubiri uthibitisho. Tafadhali piga simu kwa msimamizi wa FUL454 ili uthibitishe utambulisho wako. Huwezi kutangaza au kupokea kazi mpaka uidhinishwe.":"Your account is awaiting approval. Please contact the FUL454 administrator to verify your identity. You cannot post listings or receive assignments until approved.",
+    "Ombi lako halijaidhinishwa. Wasiliana na msimamizi wa FUL454 kwa maelezo.":"Your request was not approved. Contact the FUL454 administrator for details.",
+    "Akaunti yako imesitishwa. Wasiliana na msimamizi wa FUL454.":"Your account has been suspended. Contact the FUL454 administrator.",
+    "Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.":"Your account is ready to use the available services.",
+    "Usimamizi wa FUL454":"FUL454 Administration","Simamia wamiliki, madalali, wateja na maombi ya idhini.":"Manage owners, agents, buyers and approval requests.",
+    "Inapakia takwimu...":"Loading statistics...","Maombi ya idhini ya wamiliki na madalali":"Owner and agent approval requests","Inapakia maombi...":"Loading requests...",
+    "Tafuta akaunti kwa jina, email au simu":"Search accounts by name, email or phone","Andika jina, email au simu":"Enter a name, email or phone number",
+    "Inapakia akaunti...":"Loading accounts...","Muhtasari wa matangazo":"Listings overview","Inapakia matangazo...":"Loading listings...","Ripoti za biashara":"Business reports","Inapakia ripoti...":"Loading reports...",
+    "Maombi ya kampuni za udalali":"Brokerage company requests","Inapakia kampuni...":"Loading companies...","Malipo ya matangazo yanayolipiwa":"Featured listing payments","Inapakia malipo...":"Loading payments...",
+    "Weka tangazo jipya":"Create a new listing","Kichwa cha tangazo":"Listing title","Kampuni (hiari)":"Company (optional)","Akaunti binafsi":"Personal account","Bei (TZS)":"Price (TZS)","Wilaya":"District","Kata":"Ward","Anuani / mtaa":"Address / street","Jina la mawasiliano":"Contact name","Namba ya simu ya mawasiliano":"Contact phone number","Namba ya WhatsApp (hiari)":"WhatsApp number (optional)","Maelezo":"Description","Picha (inapendekezwa, unaweza kuongeza baadae)":"Photos (recommended; you can add them later)",
+    "Tuma tangazo likaguliwe":"Submit listing for review","Matangazo yangu":"My listings","Matangazo niliyohifadhi":"My saved listings","Fungua yote niliyohifadhi":"View all saved listings","Historia ya utafutaji":"Search history",
+    "Akaunti ya kampuni ya udalali":"Brokerage company account","Sajili kampuni na uwasilishe kwa idhini ya FUL454.":"Register your company and submit it for FUL454 approval.",
+    "Jina la kampuni":"Company name","Namba ya usajili (hiari)":"Registration number (optional)","Simu ya kampuni":"Company phone","Mkoa":"Region","Anuani":"Address","Sajili kampuni":"Register company",
+    "Tangaza mali yako juu (matangazo yanayolipiwa)":"Feature your listing (paid promotion)",
+    "Baada ya kufanya malipo, mpigie Super Admin kupitia ":"After making payment, call the Super Admin at ",
+    "na umtajie kiasi ulicholipa pamoja na tangazo/kifurushi. Tangazo halitawekwa juu mpaka Super Admin athibitishe fedha zimepokelewa.":"and provide the amount paid and the listing/package details. Your listing will not be featured until the Super Admin confirms receipt of payment.",
+    "Tangazo lililoidhinishwa":"Approved listing","Kifurushi":"Package","Njia / kumbukumbu ya malipo":"Payment method / reference","Namba ya muamala au njia ya malipo":"Transaction number or payment method","Tuma ombi la matangazo":"Submit promotion request",
+    "Maombi ya mawakala":"Agent requests","Maombi yangu ya mawasiliano":"My contact requests","Usimamizi wa matangazo":"Listing moderation","Uthibitisho wa maombi ya mawakala kwa kila tangazo":"Agent request approvals for each listing",
+    "Jina halijawekwa":"Name not provided","Simu haijawekwa":"Phone not provided","Hakuna maombi mapya yanayosubiri idhini.":"There are no new approval requests.","Hakuna akaunti zilizopatikana.":"No accounts found.",
+    "Huna ruhusa ya kufanya kitendo hiki.":"You are not authorized to perform this action.","Andika sababu ya kukataa (hiari):":"Enter a reason for rejection (optional):",
+    "Akaunti imeidhinishwa.":"Account approved.","Akaunti imesitishwa.":"Account suspended.","Akaunti ya mmiliki lazima ithibitishwe kwanza.":"The owner account must be approved first.",
+    "Jaza kichwa (herufi 5–140), bei sahihi, mkoa, wilaya, maelezo (herufi 20–5000), jina na simu ya mawasiliano.":"Complete the title (5–140 characters), valid price, region, district, description (20–5,000 characters), contact name and phone number.",
+    "Weka picha zisizozidi 8 kwa tangazo moja.":"Upload no more than 8 photos per listing.",
+    "Picha ziwe JPG, PNG au WEBP na kila picha isiwe zaidi ya MB 5.":"Photos must be JPG, PNG or WEBP, and each photo must be no larger than 5 MB.",
+    "Mawasiliano hayakuhifadhiwa: ":"Contact details could not be saved: ","Picha ":"Photo ","Taarifa ya picha ":"Photo details "," haikuhifadhiwa: ":" could not be saved: ",
+    "Tangazo limetumwa lakini kuna mambo ya kurekebisha: ":"The listing was submitted, but some items need attention: ",
+    "Tangazo, mawasiliano na picha vimetumwa kwa ukaguzi. Litachapishwa baada ya kuidhinishwa.":"The listing, contact details and photos have been submitted for review. It will be published after approval.",
+    "Hujaweka tangazo bado.":"You have not posted a listing yet.","Hakuna matangazo yanayosubiri.":"There are no pending listings.",
+    "Hakuna maombi ya mawakala.":"There are no agent requests.","Uamuzi haujahifadhiwa: ":"The decision could not be saved: ","Umekataa ombi la wakala.":"You rejected the agent's request.",
+    "Bado hujaomba ruhusa ya mawasiliano.":"You have not requested access to contact details yet.","Hakuna maombi yanayosubiri uthibitisho.":"There are no requests awaiting approval.",
+    "Uthibitisho haukufanikiwa: ":"Approval failed: ","Ombi la wakala limethibitishwa.":"The agent request has been approved.","Ombi la wakala limekataliwa.":"The agent request has been rejected.",
+    "Sababu ya kukataa?":"Reason for rejection?","Tangazo limeidhinishwa na kuchapishwa.":"The listing has been approved and published.","Tangazo limekataliwa.":"The listing has been rejected.",
+    "Tafadhali jaribu tena.":"Please try again.","Imeshindikana: ":"Failed: ","Inasajili...":"Signing up...","Inaingia...":"Signing in...","Inatoka...":"Signing out...",
+    "Inapakia ulichohifadhi...":"Loading saved listings...","Inapakia dashibodi...":"Loading dashboard...","Inatafuta...":"Searching...","Inafungua tangazo...":"Opening listing...",
+    "Inatuma ombi...":"Submitting request...","Inatuma tangazo...":"Submitting listing...","Inahifadhi uamuzi...":"Saving decision...","Inathibitisha ombi...":"Approving request...","Inakagua tangazo...":"Reviewing listing...",
+    "Kuhifadhi mtandaoni kumeshindikana: ":"Could not save online: ","Bado hujahifadhi tangazo.":"You have not saved any listings yet.",
+    "Hakuna kampuni iliyosajiliwa.":"No company has been registered.","Hakuna tangazo lililoidhinishwa":"No approved listing","Bado hakuna historia ya utafutaji.":"There is no search history yet.",
+    "Ni mmiliki au dalali aliyethibitishwa pekee anayeweza kusajili kampuni.":"Only an approved owner or agent can register a company.",
+    "Weka jina la kampuni.":"Enter the company name.","Kampuni haijasajiliwa: ":"Company registration failed: ","Ombi la kampuni limetumwa kwa ukaguzi.":"The company application has been submitted for review.",
+    "Mmiliki aliyethibitishwa pekee ndiye anaweza kulipia tangazo.":"Only an approved owner can pay to feature a listing.","Chagua tangazo na kifurushi.":"Select a listing and a package.",
+    "Ombi halijatumwa: ":"Request was not submitted: ","Ombi limetumwa. Tangazo halitawekwa juu mpaka malipo yahakikiwe.":"Your request has been submitted. The listing will not be featured until payment is verified.",
+    "Ukadiriaji na maoni":"Ratings and reviews","Mtumiaji":"User","Hakuna maoni":"No reviews","Bado hakuna maoni.":"There are no reviews yet.",
+    "Toa ukadiriaji wako":"Leave your rating","Alama (1–5)":"Rating (1–5)","Bora sana":"Excellent","Nzuri":"Good","Wastani":"Average","Dhaifu":"Poor","Mbaya":"Bad",
+    "Andika maoni yako (hiari)":"Write your review (optional)","Tuma maoni":"Submit review","Ingia kwanza kutoa maoni.":"Please sign in to leave a review.",
+    "Maoni hayakuhifadhiwa: ":"Your review could not be saved: ","Asante. Maoni yako yamehifadhiwa.":"Thank you. Your review has been saved.",
+    "Watumiaji":"Users","Wamiliki":"Owners","Madalali":"Agents","Wateja":"Buyers","Kampuni za udalali":"Brokerage companies","Kampuni zinazosubiri":"Pending companies",
+    "Matangazo yote":"All listings","Yaliyoidhinishwa":"Approved","Yanayosubiri":"Pending","Matangazo yanayolipiwa hai":"Active featured listings","Maoni":"Reviews",
+    "Malipo yanayosubiri":"Pending payments","Malipo yaliyothibitishwa":"Verified payments","Mapato ya matangazo":"Promotion revenue","Mapato mengine ya matangazo":"Other listing revenue",
+    "Watumiaji wapya (siku 30)":"New users (30 days)","Matangazo mapya (siku 30)":"New listings (30 days)",
+    "Namba haipo":"Not provided","Haijulikani":"Unknown","Haijawekwa":"Not provided","Kiasi kinachotakiwa":"Amount due","Kumbukumbu ya malipo":"Payment reference","Tarehe ya ombi":"Request date",
+    "Mmiliki":"Owner","Simu":"Phone","Kifurushi":"Package","siku":"days","Nimethibitisha kupokea malipo":"I confirm payment received","Kataa ombi":"Reject request",
+    "Hakuna kampuni zinazosubiri idhini.":"There are no companies awaiting approval.","Hakuna malipo yanayosubiri.":"There are no pending payments.",
+    "Ombi hili limeshashughulikiwa.":"This request has already been processed.","Una uhakika unataka kukataa ombi hili?":"Are you sure you want to reject this request?",
+    "Ombi limekataliwa.":"The request has been rejected.","Kiasi au muda wa kifurushi si sahihi. Ombi limeachwa pending.":"The amount or package duration is invalid. The request remains pending.",
+    "Weka kiasi halisi cha fedha ulichopokea. Kiasi kinachotakiwa ni ":"Enter the exact amount you received. The amount due is ",
+    "Kiasi ulichoweka hakilingani na kiasi kinachotakiwa. Ombi limeachwa pending bila kuidhinishwa.":"The amount entered does not match the amount due. The request remains pending and has not been approved.",
+    "Thibitisha: umeona fedha zimeingia kweli kwenye akaunti yako, na kiasi ":"Confirm: you have verified that the money has actually reached your account, and the amount ",
+    " kinalingana na kifurushi ":" matches the package ","? Tangazo litaanza kupandishwa baada ya uthibitisho huu.":"? The listing will be featured after this confirmation.",
+    "Ombi halijapatikana.":"Request not found.","Tangazo halijapatikana: ":"Listing not found: ","Ombi halikukamilika na tangazo limerudishwa hali yake ya awali: ":"The request could not be completed and the listing was restored to its previous state: ",
+    "Malipo yamethibitishwa. Tangazo limepandishwa juu kuanzia sasa.":"Payment verified. The listing is now featured.",
+    "Akaunti binafsi":"Personal account","Tuma tangazo":"Submit listing","Ruhusu":"Approve","Idhinisha":"Approve","Kataa":"Reject","Thibitisha":"Verify","Sitisha akaunti":"Suspend account","Rudisha / Idhinisha":"Restore / Approve",
+    "Jumla ya akaunti":"Total accounts","Maombi yanayosubiri":"Pending requests","Nimempigia, Idhinisha":"I called, approve",
+    "Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.":"Your account is ready to use the available services."
+  };
+  const exact = value => {
+    const key=value.replace(/\s+/g,' ').trim();
+    return translations[key] || translations[value] || value;
+  };
+  function walk(root){
+    if(!root)return;
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+    for(const n of nodes){const v=n.nodeValue;if(v&&v.trim()){const lead=v.match(/^\s*/)?.[0]||'',tail=v.match(/\s*$/)?.[0]||'';const core=v.trim();if(translations[core])n.nodeValue=lead+translations[core]+tail;}}
+    if(root.querySelectorAll)root.querySelectorAll('input[placeholder],textarea[placeholder],img[alt],button[aria-label],*[title]').forEach(el=>{
+      ['placeholder','alt','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(v&&translations[v])el.setAttribute(a,translations[v])});
+    });
+  }
+  function translateDialogs(){
+    const a=window.alert,c=window.confirm,p=window.prompt;
+    window.alert=function(m){return a.call(this,exact(String(m)))};
+    window.confirm=function(m){return c.call(this,exact(String(m)))};
+    window.prompt=function(m,d){return p.call(this,exact(String(m)),d)};
+  }
+  function start(){
+    document.documentElement.lang='en';
+    document.title='FUL454 — Find. Discover. Connect.';
+    const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=translations[meta.content]||'Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.';
+    const toggle=document.getElementById('languageToggle');if(toggle)toggle.remove();
+    walk(document.body);
+    new MutationObserver(records=>records.forEach(rec=>{
+      if(rec.type==='childList')rec.addedNodes.forEach(n=>{if(n.nodeType===Node.TEXT_NODE){const v=n.nodeValue;if(v&&translations[v.trim()])n.nodeValue=v.replace(v.trim(),translations[v.trim()]);}else if(n.nodeType===Node.ELEMENT_NODE)walk(n)});
+      else if(rec.type==='characterData'){const v=rec.target.nodeValue;if(v&&translations[v.trim()])rec.target.nodeValue=v.replace(v.trim(),translations[v.trim()]);}
+    })).observe(document.body,{subtree:true,childList:true,characterData:true});
+    translateDialogs();
+    if(typeof fulLanguage!=='undefined'){fulLanguage='en';try{localStorage.setItem('ful454_language','en')}catch{}}
+    if(typeof applyLanguage==='function')applyLanguage();
+    document.documentElement.lang='en';
+    const toggleAgain=document.getElementById('languageToggle');if(toggleAgain)toggleAgain.remove();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
+
+</body></html>

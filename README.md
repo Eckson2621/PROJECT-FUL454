@@ -34,14 +34,16 @@ The database contains the core profiles, property listings, listing photos, cont
 - Search by keyword, region, property type, purpose and price
 - Email/password sign-up and login
 - Buyer, owner and agent account selection
-- Owner listing submission and photo upload
+- Owner listing submission with contact details and up to eight JPG/PNG/WEBP photos (5 MB each)
 - Owner listing status view
+- Agent requests permission to view listing contact details
+- Owner reviews agent requests; platform admin verifies owner-approved requests
 - Basic platform-admin listing review interface (requires an authorized admin profile)
 
 ## Important work still required before public launch
 - Verify the Cloudflare Worker deployment and Supabase Auth redirect URLs.
 - Test signup, email confirmation, login, owner listing submission, photo uploads and admin approval end-to-end.
-- Complete agent access request approval and safe contact visibility rules.
+- End-to-end test the agent request → owner decision → administrator verification flow.
 - Complete payment plans, payment verification, listing expiry and admin user management.
 - Review all database RLS and Storage policies and run production security checks.
 - Add full listing detail pages, report/fraud workflow, pagination and mobile QA.

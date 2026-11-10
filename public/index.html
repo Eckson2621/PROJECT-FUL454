@@ -494,7 +494,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
   };
   const reverse = Object.fromEntries(Object.entries(translations).map(([sw,en])=>[en,sw]));
   const exact = value => {
-    const key=String(value).replace(/\\s+/g,' ').trim();
+    const key=String(value).replace(/\s+/g,' ').trim();
     return (fulLanguage==='en'?translations[key]:reverse[key]) || value;
   };
   function walk(root){
@@ -506,7 +506,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
       if(!parent || parent.closest('.listing h3,.detail-description,[data-user-content]'))continue;
       const value=node.nodeValue;
       if(!value || !value.trim())continue;
-      const lead=value.match(/^\\s*/)?.[0]||'',tail=value.match(/\\s*$/)?.[0]||'',core=value.trim();
+      const lead=value.match(/^\s*/)?.[0]||'',tail=value.match(/\s*$/)?.[0]||'',core=value.trim();
       const translated=exact(core);
       if(translated!==core)node.nodeValue=lead+translated+tail;
     }

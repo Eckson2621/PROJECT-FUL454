@@ -343,6 +343,7 @@ function applyLanguage(){
  const homeLabels=allNodes('#homeView .search .field label'),homeEn=['What are you looking for?','Region','Type','Purpose'];homeLabels.forEach((el,i)=>{if(homeEn[i])el.textContent=t(['Unatafuta nini?','Mkoa','Aina','Madhumuni'][i],homeEn[i])});
  const browseLabels=allNodes('#browseView .field label'),browseEn=['Search term','Region','Property type','Buy / Rent','Minimum price (TZS)','Maximum price (TZS)'];browseLabels.forEach((el,i)=>{if(browseEn[i])el.textContent=t(['Neno la kutafuta','Mkoa','Aina ya mali','Kununua / Kupanga','Bei ya chini (TZS)','Bei ya juu (TZS)'][i],browseEn[i])});
  const authLabels=allNodes('#authView .field label'),authEn=['Email','Password','Full name','Phone number','Account type','Email','Password (at least 8 characters)'];authLabels.forEach((el,i)=>{if(authEn[i])el.textContent=t(['Barua pepe','Nenosiri','Jina kamili','Namba ya simu','Aina ya akaunti','Barua pepe','Nenosiri (angalau herufi 8)'][i],authEn[i])});
+ if(window.applyFulLanguage)window.applyFulLanguage();
 }
 applyLanguage();
 async function persistSavedListing(id,save){if(!currentUser)return;const q=save?sb.from('saved_listings').insert({user_id:currentUser.id,listing_id:id}):sb.from('saved_listings').delete().eq('user_id',currentUser.id).eq('listing_id',id);const {error}=await q;if(error)showFulActionToast('Kuhifadhi mtandaoni kumeshindikana: '+error.message,true)}
@@ -384,7 +385,7 @@ sb.auth.getSession().then(async({data})=>{currentUser=data.session?.user||null;i
 sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;currentProfile=null;if(currentUser){await ensureProfile();await syncSavedListings()}});
 </script>
 <script>
-/* FUL454: English-only interface. Keep user-submitted listing content unchanged. */
+/* FUL454 bilingual UI: translates interface labels in both directions and preserves user listing text. */
 (function(){
   const translations = {
     "Tafuta na gundua nyumba, viwanja, vyumba, majengo ya biashara na biashara Tanzania.":"Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.",
@@ -491,62 +492,51 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
     "Jumla ya akaunti":"Total accounts","Maombi yanayosubiri":"Pending requests","Nimempigia, Idhinisha":"I called, approve",
     "Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.":"Your account is ready to use the available services."
   };
+  const reverse = Object.fromEntries(Object.entries(translations).map(([sw,en])=>[en,sw]));
   const exact = value => {
-    const key=value.replace(/\s+/g,' ').trim();
-    return translations[key] || translations[value] || value;
+    const key=String(value).replace(/\\s+/g,' ').trim();
+    return (fulLanguage==='en'?translations[key]:reverse[key]) || value;
   };
   function walk(root){
     if(!root)return;
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    for(const n of nodes){const v=n.nodeValue;if(v&&v.trim()){const lead=v.match(/^\s*/)?.[0]||'',tail=v.match(/\s*$/)?.[0]||'';const core=v.trim();if(translations[core]||exact(core)!==core)n.nodeValue=lead+exact(core)+tail;}}
-    if(root.querySelectorAll)root.querySelectorAll('input[placeholder],textarea[placeholder],img[alt],button[aria-label],*[title]').forEach(el=>{
-      ['placeholder','alt','aria-label','title'].forEach(a=>{const v=el.getAttribute(a);if(v&&exact(v)!==v)el.setAttribute(a,exact(v))});
+    for(const node of nodes){
+      const parent=node.parentElement;
+      if(!parent || parent.closest('.listing h3,.detail-description,[data-user-content]'))continue;
+      const value=node.nodeValue;
+      if(!value || !value.trim())continue;
+      const lead=value.match(/^\\s*/)?.[0]||'',tail=value.match(/\\s*$/)?.[0]||'',core=value.trim();
+      const translated=exact(core);
+      if(translated!==core)node.nodeValue=lead+translated+tail;
+    }
+    if(root.querySelectorAll)root.querySelectorAll('input[placeholder],textarea[placeholder],button[aria-label],*[title]').forEach(el=>{
+      ['placeholder','aria-label','title'].forEach(attr=>{
+        const value=el.getAttribute(attr);if(value){const translated=exact(value);if(translated!==value)el.setAttribute(attr,translated)}
+      });
     });
   }
-  function translateDialogs(){
-    const a=window.alert,c=window.confirm,p=window.prompt;
-    window.alert=function(m){return a.call(this,exact(String(m)))};
-    window.confirm=function(m){return c.call(this,exact(String(m)))};
-    window.prompt=function(m,d){return p.call(this,exact(String(m)),d)};
-  }
-  function updateLanguageButton(){
+  window.applyFulLanguage=function(){
+    document.documentElement.lang=fulLanguage;
+    walk(document.body);
     const button=document.getElementById('languageToggle');
-    if(button){
-      button.textContent=currentLang()==='en'?'Kiswahili':'English';
-      button.setAttribute('aria-label',currentLang()==='en'?'Switch language to Kiswahili':'Switch language to English');
-      button.title=button.getAttribute('aria-label');
-    }
-  }
-  function switchLanguage(){
-    fulLanguage=currentLang()==='en'?'sw':'en';
-    try{localStorage.setItem('ful454_language',fulLanguage)}catch(e){}
-    document.documentElement.lang=fulLanguage;
-    walk(document.body);
-    updateLanguageButton();
-  }
+    if(button){button.textContent=fulLanguage==='en'?'SW':'EN';button.setAttribute('aria-label',fulLanguage==='en'?'Switch to Kiswahili':'Switch to English')}
+  };
   function start(){
-    try{fulLanguage=localStorage.getItem('ful454_language')||'en'}catch(e){fulLanguage='en'}
-    if(fulLanguage!=='sw'&&fulLanguage!=='en')fulLanguage='en';
-    document.documentElement.lang=fulLanguage;
-    document.title='FUL454 — Find. Discover. Connect.';
-    const meta=document.querySelector('meta[name="description"]');
-    if(meta)meta.content=fulLanguage==='en'?'Find and discover homes, plots, rooms, commercial buildings and businesses in Tanzania.':'Tafuta na gundua nyumba, viwanja, vyumba, majengo ya biashara na biashara Tanzania.';
-    walk(document.body);
-    updateLanguageButton();
-    window.toggleLanguage=switchLanguage;
-    window.applyLanguage=function(){document.documentElement.lang=currentLang();walk(document.body);updateLanguageButton()};
-    new MutationObserver(records=>records.forEach(rec=>{
-      if(rec.type==='childList')rec.addedNodes.forEach(n=>{
-        if(n.nodeType===Node.TEXT_NODE){const v=n.nodeValue;if(v&&exact(v.trim())!==v.trim())n.nodeValue=v.replace(v.trim(),exact(v.trim()))}
-        else if(n.nodeType===Node.ELEMENT_NODE)walk(n);
+    try{const saved=localStorage.getItem('ful454_language');if(saved==='sw'||saved==='en')fulLanguage=saved}catch(e){}
+    if(typeof applyLanguage==='function')applyLanguage();
+    window.applyFulLanguage();
+    new MutationObserver(records=>records.forEach(record=>{
+      if(record.type==='childList')record.addedNodes.forEach(node=>{
+        if(node.nodeType===Node.ELEMENT_NODE)walk(node);
+        else if(node.nodeType===Node.TEXT_NODE&&node.parentElement&&!node.parentElement.closest('.listing h3,.detail-description,[data-user-content]')){
+          const value=node.nodeValue||'',translated=exact(value.trim());if(translated!==value.trim())node.nodeValue=value.replace(value.trim(),translated);
+        }
       });
-      else if(rec.type==='characterData'){const v=rec.target.nodeValue;if(v&&exact(v.trim())!==v.trim())rec.target.nodeValue=v.replace(v.trim(),exact(v.trim()))}
+      else if(record.type==='characterData'&&record.target.parentElement&&!record.target.parentElement.closest('.listing h3,.detail-description,[data-user-content]')){
+        const value=record.target.nodeValue||'',translated=exact(value.trim());if(translated!==value.trim())record.target.nodeValue=value.replace(value.trim(),translated);
+      }
     })).observe(document.body,{subtree:true,childList:true,characterData:true});
-    const originalAlert=window.alert,originalConfirm=window.confirm,originalPrompt=window.prompt;
-    window.alert=function(m){return originalAlert.call(this,exact(String(m)))};
-    window.confirm=function(m){return originalConfirm.call(this,exact(String(m)))};
-    window.prompt=function(m,d){return originalPrompt.call(this,exact(String(m)),d)};
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

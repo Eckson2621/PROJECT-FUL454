@@ -5,7 +5,7 @@ export default {
     if (url.pathname === "/health") {
       return Response.json({
         ok: true,
-        app: "PROJECT FUL454",
+        app: "FUL454",
         service: "cloudflare-worker"
       }, {
         headers: {

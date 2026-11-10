@@ -39,6 +39,77 @@ button.is-busy{filter:saturate(.85);cursor:wait}
 @keyframes fulspin{to{transform:rotate(360deg)}}
 #fulActionToast{position:fixed;right:16px;bottom:16px;z-index:1000;max-width:min(420px,calc(100vw - 32px));padding:12px 16px;border-radius:12px;background:#173e30;color:#fff;box-shadow:0 12px 35px #071d1740;display:none}
 #fulActionToast.error{background:#a1372c}
+
+/* FUL454 colourful navy + violet theme */
+:root{
+  --ink:#202044;--muted:#666887;--green:#5546c8;--lime:#8ce7dc;
+  --paper:#eeefff;--line:#deddf6;--white:#fff;
+  --shadow:0 16px 42px rgba(48,42,120,.12)
+}
+body{
+  background:
+    radial-gradient(ellipse at 8% 8%,rgba(119,104,255,.19),transparent 34%),
+    radial-gradient(ellipse at 94% 26%,rgba(57,206,198,.16),transparent 30%),
+    linear-gradient(135deg,#f0efff 0%,#eaf5ff 48%,#f8edff 100%);
+  background-attachment:fixed;color:var(--ink)
+}
+header{
+  background:linear-gradient(105deg,#171744 0%,#4935a8 58%,#176d83 100%);
+  box-shadow:0 8px 30px rgba(37,31,105,.24)
+}
+.brand span{color:#8ce7dc}
+nav button{color:#f2f1ff}
+.hero{
+  background:linear-gradient(120deg,#211b63 0%,#5540b9 55%,#147d8c 100%);
+  box-shadow:0 24px 60px rgba(50,39,145,.25)
+}
+.eyebrow{color:#9cf1e5}
+.hero p{color:#e4e5ff}
+.hero-art{
+  background:radial-gradient(circle at 70% 25%,#9cf1e588,transparent 30%),
+    linear-gradient(145deg,#ffffff28,#ffffff08);
+  border-color:#ffffff45
+}
+.search,.panel,.listing,.how-card,.category-tile{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(245,243,255,.94));
+  border-color:#deddf6;
+  box-shadow:0 14px 36px rgba(48,42,120,.10)
+}
+.panel{border-radius:20px}
+.listing{border-radius:20px}
+.photo,.detail-gallery{background:linear-gradient(135deg,#e1e2ff,#d8f3f1)}
+.price{color:#5141bc}
+.tag{background:#ece9ff;color:#5141bc}
+button{
+  background:linear-gradient(110deg,#5141bc,#7560e8);
+  box-shadow:0 5px 14px rgba(81,65,188,.16)
+}
+.btn-light{
+  background:linear-gradient(110deg,#e9e7ff,#dcf7f3);
+  color:#40358f;box-shadow:none
+}
+.btn-dark{background:linear-gradient(110deg,#20204d,#343477)}
+.whatsapp-btn{background:linear-gradient(110deg,#13894c,#20ad73)}
+.call-btn{background:linear-gradient(110deg,#24245c,#44449a)}
+.field input,.field select,.field textarea,.sort-row select{
+  background:#fff;border-color:#d9d8f0
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:3px solid #a9a0ff66;border-color:#6655d4
+}
+.category-tile:hover{border-color:#7868e8;background:#f0edff}
+.how-number{background:linear-gradient(135deg,#e8e5ff,#d9f7f2);color:#5141bc}
+.saved-btn{background:#fff1c7;color:#795400;box-shadow:none}
+.saved-btn.active{background:#dff4e5;color:#176b50}
+footer{background:linear-gradient(105deg,#171744,#4935a8 60%,#176d83);color:#e2e3ff}
+.detail-modal{box-shadow:0 30px 90px rgba(23,20,75,.38)}
+.detail-meta div{background:linear-gradient(135deg,#f0efff,#e9f8f7)}
+.detail-thumb.active{border-color:#6655d4}
+#fulActionToast{background:linear-gradient(110deg,#27215f,#5141bc)}
+@media(max-width:600px){
+  body{background-attachment:scroll}
+}
+
 </style></head><body><div id="fulActionToast" role="status" aria-live="polite"></div>
 <header><div class="brand">FUL<span>454</span></div><nav><button onclick="showView('home')">Nyumbani</button><button onclick="showView('browse')">Tafuta</button><button onclick="showView('dashboard')">Dashibodi</button><button onclick="openAuth()">Ingia / Jisajili</button></nav></header>
 <main class="wrap">

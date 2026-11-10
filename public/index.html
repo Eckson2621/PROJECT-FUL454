@@ -305,7 +305,7 @@ function bindFulBusyAction(name,loadingText){
 
 /* FUL454 new capabilities */
 let fulLanguage=localStorage.getItem('ful454_language')||'sw';
-function $(s){return Array.from(document.querySelectorAll(s))}
+function allNodes(s){return Array.from(document.querySelectorAll(s))}
 function toggleLanguage(){fulLanguage=fulLanguage==='sw'?'en':'sw';localStorage.setItem('ful454_language',fulLanguage);applyLanguage()}
 function applyLanguage(){const en=fulLanguage==='en',t=(a,b)=>en?b:a,nav=$('header nav button');if(nav[0])nav[0].textContent=t('Nyumbani','Home');if(nav[1])nav[1].textContent=t('Tafuta','Browse');if(nav[2])nav[2].textContent=t('Dashibodi','Dashboard');if(nav[3])nav[3].textContent=t('Ingia / Jisajili','Login / Sign up');if($('languageToggle'))$('languageToggle').textContent=en?'SW':'EN';const h=$('.hero h1');if(h)h.textContent=t('Mahali sahihi pa kuanza kutafuta.','The right place to start your search.');const p=$('.hero p');if(p)p.textContent=t('Gundua nyumba, vyumba, viwanja, majengo ya biashara na biashara zinazotangazwa. Tanzania kwanza — dunia nzima mbele.','Discover homes, rooms, plots, commercial buildings and businesses. Tanzania first — the world next.');const b=$('.hero .actions button');if(b[0])b[0].textContent=t('Anza kutafuta','Start searching');if(b[1])b[1].textContent=t('Weka tangazo','Post a listing');const bh=$('#browseView h2');if(bh)bh.textContent=t('Tafuta matangazo','Browse listings');const dh=$('#dashboardView h2');if(dh)dh.textContent=t('Dashibodi yangu','My dashboard')}
 applyLanguage();

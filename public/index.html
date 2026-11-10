@@ -201,10 +201,10 @@ async function loadSuperAdminDashboard(){
   if(error){stats.innerHTML='<div class="notice danger">Imeshindikana kupata akaunti: '+esc(error.message)+'</div>';accounts.innerHTML='';return}
   adminAccountCache=data||[];
   const count=t=>adminAccountCache.filter(x=>x.account_type===t).length;
-  const pending=adminAccountCache.filter(x=>['owner','agent'].includes(x.account_type)&&(x.approval_status||'pending')==='pending');
+  const pendingAccounts=adminAccountCache.filter(x=>['owner','agent'].includes(x.account_type)&&(x.approval_status||'pending')==='pending');
   stats.innerHTML='<div class="panel"><b>'+adminAccountCache.length+'</b><br>Jumla ya akaunti</div><div class="panel"><b>'+count('owner')+'</b><br>Wamiliki</div><div class="panel"><b>'+count('agent')+'</b><br>Madalali / Wakala</div><div class="panel"><b>'+count('buyer')+'</b><br>Wateja</div><div class="panel"><b>'+pending.length+'</b><br>Maombi yanayosubiri</div>';
   const queue=$('accountApprovalQueue');
-  if(queue)queue.innerHTML=pending.map(x=>'<div class="panel"><b>'+esc(x.full_name||'Jina halijawekwa')+'</b><p>'+esc(x.email||'')+' · '+esc(x.phone||'')+'</p><p>'+esc(x.account_type==='owner'?'Mmiliki':'Dalali')+' — aliomba '+esc(new Date(x.approval_requested_at||x.created_at).toLocaleString('sw-TZ'))+'</p><div class="actions"><button onclick="setAccountApproval(\''+x.user_id+'\',\'approved\')">Nimempigia, Idhinisha</button><button class="btn-light" onclick="setAccountApproval(\''+x.user_id+'\',\'rejected\')">Kataa</button></div></div>').join('')||'<div class="notice success">Hakuna maombi mapya yanayosubiri idhini.</div>';
+  if(queue)queue.innerHTML=pendingAccounts.map(x=>'<div class="panel"><b>'+esc(x.full_name||'Jina halijawekwa')+'</b><p>'+esc(x.email||'')+' · '+esc(x.phone||'')+'</p><p>'+esc(x.account_type==='owner'?'Mmiliki':'Dalali')+' — aliomba '+esc(new Date(x.approval_requested_at||x.created_at).toLocaleString('sw-TZ'))+'</p><div class="actions"><button onclick="setAccountApproval(\''+x.user_id+'\',\'approved\')">Nimempigia, Idhinisha</button><button class="btn-light" onclick="setAccountApproval(\''+x.user_id+'\',\'rejected\')">Kataa</button></div></div>').join('')||'<div class="notice success">Hakuna maombi mapya yanayosubiri idhini.</div>';
   renderAdminAccounts(adminAccountCache);
   const {data:ls,error:le}=await sb.from('property_listings').select('id,title,status,price,currency_code,region,owner_id,created_at').order('created_at',{ascending:false}).limit(100);
   if(le){listings.innerHTML='<div class="notice danger">'+esc(le.message)+'</div>';return}

@@ -6,7 +6,8 @@ FUL454 is a Tanzania-first property and business discovery/listing platform owne
 ## Application stack
 - Frontend: HTML, CSS and JavaScript in `public/index.html`
 - Hosting: Cloudflare Workers Static Assets
-- Authentication, database and photo storage: Supabase
+- Authentication and database: Supabase
+- Listing photos: private Supabase Storage bucket with short-lived signed URLs
 - Source control: GitHub
 
 ## Deploy through the existing Cloudflare Worker
@@ -35,6 +36,7 @@ The database contains the core profiles, property listings, listing photos, cont
 - Email/password sign-up and login
 - Buyer, owner and agent account selection
 - Owner listing submission with contact details and up to eight JPG/PNG/WEBP photos (5 MB each)
+- Listing images are kept in a private bucket and served using temporary signed URLs only for approved listings
 - Owner listing status view
 - Agent requests permission to view listing contact details
 - Owner reviews agent requests; platform admin verifies owner-approved requests

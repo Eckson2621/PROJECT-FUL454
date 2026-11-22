@@ -25,7 +25,9 @@ This repository is configured for a Cloudflare Worker named `ful454`, intended t
 The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.js`; public site assets are in `public/`.
 
 ## Supabase project
-Project ref: `bpavcqtttadzenuvvkkv`
+Project ref: `ieeyvhcluywkoymliswq` (migrated destination in Mwampaja Eckson / EAM VENTURES 1)
+
+Previous project ref: `bpavcqtttadzenuvvkkv` (preserved as source backup; do not delete until cutover verification is complete)
 Region: EU West (Paris)
 
 The database contains the core profiles, property listings, listing photos, contacts, agent access requests, listing payments and audit logs tables.

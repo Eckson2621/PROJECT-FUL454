@@ -222,9 +222,9 @@ const status=currentProfile?.approval_status||'pending';
 const statusNames={pending:'Inasubiri uthibitisho wa Super Admin',approved:'Imethibitishwa',rejected:'Ombi limekataliwa',suspended:'Akaunti imesitishwa'};
 $('who').textContent=(currentProfile?.full_name||currentUser.email)+' · '+(currentProfile?.account_type||'akaunti');
 let html='<div class="panel"><h3>Akaunti yangu</h3><p>'+esc(currentUser.email)+' · '+esc(currentProfile?.account_type||'buyer')+'</p><p>Hali ya idhini: <span class="tag">'+esc(statusNames[status]||status)+'</span></p>';
-if((currentProfile?.account_type==='owner'||currentProfile?.account_type==='agent')&&status!=='approved'){
-html+='<div class="notice">'+(status==='pending'?'Akaunti yako inasubiri uthibitisho wa Super Admin. Huwezi kutangaza mali au kupokea kazi mpaka uidhinishwe.':status==='rejected'?'Ombi lako halijaidhinishwa. Wasiliana na msimamizi wa FUL454 kwa maelezo.':'Akaunti yako imesitishwa. Wasiliana na msimamizi wa FUL454.')+'</div>';
-if(status!=='approved')html+='<div class="actions"><a class="btn-light" href="tel:0613794448">Piga simu</a><a class="btn-light" href="sms:0613794448?body='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">Tuma SMS</a><a class="btn-light" target="_blank" rel="noopener noreferrer" href="https://wa.me/255613794448?text='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">WhatsApp</a></div>';
+if(currentProfile?.platform_role!=='eam_super_admin'&&status!=='approved'){
+html+='<div class="notice">'+(status==='pending'?'Akaunti yako inasubiri uthibitisho wa Super Admin. Huwezi kutumia huduma za akaunti mpaka uidhinishwe.':status==='rejected'?'Ombi lako halijaidhinishwa. Wasiliana na msimamizi wa FUL454 kwa maelezo.':'Akaunti yako imesitishwa. Wasiliana na msimamizi wa FUL454.')+'</div>';
+html+='<div class="actions"><a class="btn-light" href="tel:0613794448">Piga simu</a><a class="btn-light" href="sms:0613794448?body='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">Tuma SMS</a><a class="btn-light" target="_blank" rel="noopener noreferrer" href="https://wa.me/255613794448?text='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">WhatsApp</a></div>';
 }else{
 html+='<p class="muted">Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.</p>';
 }
@@ -283,7 +283,7 @@ async function loadSuperAdminDashboard(){
   if(error){stats.innerHTML='<div class="notice danger">Imeshindikana kupata akaunti: '+esc(error.message)+'</div>';accounts.innerHTML='';return}
   adminAccountCache=data||[];
   const count=t=>adminAccountCache.filter(x=>x.account_type===t).length;
-  const pendingAccounts=adminAccountCache.filter(x=>['owner','agent'].includes(x.account_type)&&(x.approval_status||'pending')==='pending');
+  const pendingAccounts=adminAccountCache.filter(x=>!['eam_super_admin','project_admin'].includes(x.platform_role)&&(x.approval_status||'pending')==='pending');
   updateFul454AdminNotifications(pendingAccounts);
   startFul454AdminPolling();
   stats.innerHTML='<div class="panel"><b>'+adminAccountCache.length+'</b><br>Jumla ya akaunti</div><div class="panel"><b>'+count('owner')+'</b><br>Wamiliki</div><div class="panel"><b>'+count('agent')+'</b><br>Madalali / Wakala</div><div class="panel"><b>'+count('buyer')+'</b><br>Wateja</div><div class="panel"><b>'+pendingAccounts.length+'</b><br>Maombi yanayosubiri</div>';
@@ -297,7 +297,7 @@ async function loadSuperAdminDashboard(){
 }
 function approvalLabel(s){return ({pending:'Inasubiri',approved:'Imeidhinishwa',rejected:'Imekataliwa',suspended:'Imesitishwa'})[s]||s||'Haijulikani'}
 function approvalActions(x){
- if(!['owner','agent'].includes(x.account_type))return '';
+ if(['eam_super_admin','project_admin'].includes(x.platform_role))return '';
  const id=esc(x.user_id),st=x.approval_status||'pending';
  return '<p>Idhini: <span class="tag">'+esc(approvalLabel(st))+'</span></p>'+
  (st==='pending'?'<div class="actions"><button onclick="setAccountApproval(\''+id+'\',\'approved\')">Idhinisha</button><button class="btn-light" onclick="setAccountApproval(\''+id+'\',\'rejected\')">Kataa</button></div>':'')+

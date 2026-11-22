@@ -193,7 +193,15 @@ function showView(v){['home','browse','dashboard','auth'].forEach(x=>$(x+'View')
 function openAuth(){toggleAuth(false);showView('auth')}
 function toggleAuth(reg){$('loginForm').classList.toggle('hidden',reg);$('signupForm').classList.toggle('hidden',!reg);$('authTitle').textContent=reg?'Fungua akaunti':'Ingia FUL454';$('authMessage').innerHTML=''}
 function message(t,ok=false){$('authMessage').innerHTML='<div class="notice '+(ok?'success':'')+'">'+esc(t)+'</div>'}
-async function signUp(){let full_name=$('fullName').value.trim(),phone=$('phone').value.trim(),account_type=$('accountType').value,email=$('signupEmail').value.trim(),password=$('signupPassword').value;if(!full_name||!email||password.length<8){message('Jaza jina, barua pepe na nenosiri lenye angalau herufi 8.');return}let {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name,phone,account_type}}});if(error){message(error.message);return}if(data.session){currentUser=data.user;await ensureProfile({full_name,phone,account_type});message('Akaunti imefunguliwa. Karibu FUL454.',true);showView('dashboard')}else message('Usajili umepokelewa. Fungua barua pepe yako kuthibitisha akaunti, kisha ingia.',true)}
+function appendFulContactActions(hostId='authMessage',body='Habari Super Admin, nimejisajili FUL454. Naomba msaada wa idhini ya akaunti yangu.'){
+ const host=$(hostId);if(!host)return;
+ const wrap=document.createElement('div');wrap.className='actions';wrap.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px';
+ const call=document.createElement('a');call.href='tel:0613794448';call.className='btn-light';call.textContent='Piga simu';
+ const sms=document.createElement('a');sms.href='sms:0613794448?body='+encodeURIComponent(body);sms.className='btn-light';sms.textContent='Tuma SMS';
+ const wa=document.createElement('a');wa.href='https://wa.me/255613794448?text='+encodeURIComponent(body);wa.target='_blank';wa.rel='noopener noreferrer';wa.className='btn-light';wa.textContent='WhatsApp';
+ wrap.append(call,sms,wa);host.appendChild(wrap);
+}
+async function signUp(){let full_name=$('fullName').value.trim(),phone=$('phone').value.trim(),account_type=$('accountType').value,email=$('signupEmail').value.trim(),password=$('signupPassword').value;if(!full_name||!email||password.length<8){message('Jaza jina, barua pepe na nenosiri lenye angalau herufi 8.');return}let {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name,phone,account_type}}});if(error){message(error.message);return}if(data.session){currentUser=data.user;await ensureProfile({full_name,phone,account_type});message('Akaunti imefunguliwa. Karibu FUL454.',true);showView('dashboard')}else{message('Usajili umepokelewa. Fungua barua pepe yako kuthibitisha akaunti, kisha ingia. Akaunti ya mmiliki/dalali itasubiri idhini ya Super Admin.',true);appendFulContactActions()}}
 async function ensureProfile(meta={}){if(!currentUser)return;let {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();if(data){currentProfile=data;return}let p={id:currentUser.id,full_name:meta.full_name||currentUser.user_metadata?.full_name||'',phone:meta.phone||currentUser.user_metadata?.phone||null,account_type:meta.account_type||currentUser.user_metadata?.account_type||'buyer'};let r=await sb.from('profiles').insert(p).select().single();if(!r.error)currentProfile=r.data;else console.warn('Profile creation needs database trigger/policy:',r.error.message)}
 async function signIn(){let {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){message(error.message);return}currentUser=data.user;await ensureProfile();message('Umeingia kikamilifu.',true);showView('dashboard')}
 async function signOut(){await sb.auth.signOut();currentUser=null;currentProfile=null;showView('home')}
@@ -215,13 +223,14 @@ const statusNames={pending:'Inasubiri uthibitisho wa Super Admin',approved:'Imet
 $('who').textContent=(currentProfile?.full_name||currentUser.email)+' · '+(currentProfile?.account_type||'akaunti');
 let html='<div class="panel"><h3>Akaunti yangu</h3><p>'+esc(currentUser.email)+' · '+esc(currentProfile?.account_type||'buyer')+'</p><p>Hali ya idhini: <span class="tag">'+esc(statusNames[status]||status)+'</span></p>';
 if((currentProfile?.account_type==='owner'||currentProfile?.account_type==='agent')&&status!=='approved'){
-html+='<div class="notice">'+(status==='pending'?'Akaunti yako inasubiri uthibitisho. Tafadhali piga simu kwa msimamizi wa FUL454 ili uthibitishe utambulisho wako. Huwezi kutangaza au kupokea kazi mpaka uidhinishwe.':status==='rejected'?'Ombi lako halijaidhinishwa. Wasiliana na msimamizi wa FUL454 kwa maelezo.':'Akaunti yako imesitishwa. Wasiliana na msimamizi wa FUL454.')+'</div>';
+html+='<div class="notice">'+(status==='pending'?'Akaunti yako inasubiri uthibitisho wa Super Admin. Huwezi kutangaza mali au kupokea kazi mpaka uidhinishwe.':status==='rejected'?'Ombi lako halijaidhinishwa. Wasiliana na msimamizi wa FUL454 kwa maelezo.':'Akaunti yako imesitishwa. Wasiliana na msimamizi wa FUL454.')+'</div>';
+if(status!=='approved')html+='<div class="actions"><a class="btn-light" href="tel:0613794448">Piga simu</a><a class="btn-light" href="sms:0613794448?body='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">Tuma SMS</a><a class="btn-light" target="_blank" rel="noopener noreferrer" href="https://wa.me/255613794448?text='+encodeURIComponent('Habari Super Admin, akaunti yangu ya FUL454 inasubiri idhini. Naomba msaada.')+'">WhatsApp</a></div>';
 }else{
 html+='<p class="muted">Akaunti yako iko tayari kutumia huduma zinazoruhusiwa.</p>';
 }
 html+='</div>';
 if(currentProfile?.account_type==='owner'&&status==='approved')html+='<div class="panel"><h2>Owner Dashboard</h2><p class="muted">Your private listing performance and account activity.</p><div id="ownerAnalytics" class="owner-analytics"><div class="analytics-empty">Loading your analytics...</div></div></div>';
-if(currentProfile?.platform_role==='eam_super_admin')html+='<div class="panel"><h2>SUPER ADMIN — Usimamizi wa FUL454</h2><p class="muted">Simamia wamiliki, madalali, wateja na maombi ya idhini.</p><div id="superAdminStats" class="form-grid"><div class="notice">Inapakia takwimu...</div></div><div class="section-head"><h3>Maombi ya idhini ya wamiliki na madalali</h3></div><div id="accountApprovalQueue">Inapakia maombi...</div><div class="field"><label>Tafuta akaunti kwa jina, email au simu</label><input id="adminAccountSearch" placeholder="Andika jina, email au simu" oninput="filterAdminAccounts()"></div><div id="superAdminAccounts">Inapakia akaunti...</div><div class="section-head"><h3>Muhtasari wa matangazo</h3></div><div id="superAdminListings">Inapakia matangazo...</div><div class="section-head"><h3>Ripoti za biashara</h3></div><div id="businessReport" class="form-grid">Inapakia ripoti...</div><div class="section-head"><h3>Maombi ya kampuni za udalali</h3></div><div id="brokerageQueue">Inapakia kampuni...</div><div class="section-head"><h3>Malipo ya matangazo yanayolipiwa</h3></div><div id="promotionQueue">Inapakia malipo...</div></div>';
+if(currentProfile?.platform_role==='eam_super_admin')html+='<div class="panel"><h2>SUPER ADMIN — Usimamizi wa FUL454</h2><p class="muted">Simamia wamiliki, madalali, wateja na maombi ya idhini.</p><div class="notice" style="margin:12px 0"><div class="row" style="justify-content:space-between"><b>ARIFA ZA USAJILI MPYA</b><b id="fulPendingCount">0</b></div><p class="small">Washa notifications ili simu ikuonye wamiliki na madalali wapya wanaosubiri idhini. Acha dashboard/browser wazi.</p><button class="btn-light" id="enableFulNotifications" onclick="enableFul454AdminNotifications()">Washa arifa kwenye simu</button><div id="fulNotificationStatus" class="small" role="status">Arifa hazijawashwa.</div></div><div id="superAdminStats" class="form-grid"><div class="notice">Inapakia takwimu...</div></div><div class="section-head"><h3>Maombi ya idhini ya wamiliki na madalali</h3></div><div id="accountApprovalQueue">Inapakia maombi...</div><div class="field"><label>Tafuta akaunti kwa jina, email au simu</label><input id="adminAccountSearch" placeholder="Andika jina, email au simu" oninput="filterAdminAccounts()"></div><div id="superAdminAccounts">Inapakia akaunti...</div><div class="section-head"><h3>Muhtasari wa matangazo</h3></div><div id="superAdminListings">Inapakia matangazo...</div><div class="section-head"><h3>Ripoti za biashara</h3></div><div id="businessReport" class="form-grid">Inapakia ripoti...</div><div class="section-head"><h3>Maombi ya kampuni za udalali</h3></div><div id="brokerageQueue">Inapakia kampuni...</div><div class="section-head"><h3>Malipo ya matangazo yanayolipiwa</h3></div><div id="promotionQueue">Inapakia malipo...</div></div>';
 if((currentProfile?.account_type==='owner'&&status==='approved')||currentProfile?.platform_role){
 html+='<div class="panel"><h3>Weka tangazo jipya</h3><div class="form-grid"><div class="field"><label>Kichwa cha tangazo</label><input id="ltitle"></div><div class="field"><label>Kampuni (hiari)</label><select id="listingCompanySelect"><option value="">Akaunti binafsi</option></select></div><div class="field"><label>Aina ya mali</label><select id="ltype"><option value="house">Nyumba</option><option value="room">Chumba</option><option value="plot">Kiwanja</option><option value="commercial_building">Jengo la biashara</option><option value="business">Biashara</option></select></div><div class="field"><label>Madhumuni</label><select id="lpurpose"><option value="sale">Kununua</option><option value="rent">Kupanga</option></select></div><div class="field"><label>Bei (TZS)</label><input id="lprice" type="number" min="1"></div><div class="field"><label>Mkoa</label><input id="lregion"></div><div class="field"><label>Wilaya</label><input id="ldistrict"></div><div class="field"><label>Kata</label><input id="lward"></div><div class="field"><label>Anuani / mtaa</label><input id="laddress"></div><div class="field"><label>Jina la mawasiliano</label><input id="contactName" autocomplete="name"></div><div class="field"><label>Namba ya simu ya mawasiliano</label><input id="contactPhone" type="tel" autocomplete="tel"></div><div class="field"><label>Namba ya WhatsApp (hiari)</label><input id="contactWhatsApp" type="tel"></div><div class="field full"><label>Maelezo</label><textarea id="ldesc" rows="4"></textarea></div><div class="field full"><label>Picha (inapendekezwa, unaweza kuongeza baadae)</label><input id="lphotos" type="file" accept="image/*" multiple></div></div><p><button onclick="createListing()">Tuma tangazo likaguliwe</button></p><div id="listingMsg"></div></div>';
 }
@@ -238,6 +247,35 @@ if(currentProfile?.account_type==='agent'&&status==='approved')loadAgentRequests
 if(currentProfile?.platform_role==='project_admin'||currentProfile?.platform_role==='eam_super_admin'){loadAdminListings();loadAdminAgentRequests()}
 }
 let adminAccountCache=[];
+let fulAdminNotificationTimer=null;
+const FUL454_PENDING_KEY='ful454_admin_pending_accounts_v1';
+function updateFul454AdminNotifications(pendingAccounts){
+ const count=$('fulPendingCount');if(count)count.textContent=String(pendingAccounts.length);
+ const status=$('fulNotificationStatus');
+ if(status&&'Notification' in window)status.textContent=Notification.permission==='granted'?'Arifa zimewashwa. Acha dashboard/browser wazi ili ipokee taarifa mpya.':Notification.permission==='denied'?'Arifa zimezuiwa. Ruhusu notifications kwenye mipangilio ya browser.':'Bonyeza kitufe kuruhusu arifa kwenye simu.';
+ let previous=null;try{const raw=localStorage.getItem(FUL454_PENDING_KEY);if(raw!==null)previous=JSON.parse(raw)}catch{previous=[]}
+ const ids=pendingAccounts.map(x=>String(x.user_id));
+ if(previous===null){localStorage.setItem(FUL454_PENDING_KEY,JSON.stringify(ids));return}
+ const old=new Set(Array.isArray(previous)?previous:[]);
+ const fresh=pendingAccounts.filter(x=>!old.has(String(x.user_id)));
+ if(fresh.length&&'Notification' in window&&Notification.permission==='granted'){
+  fresh.forEach(x=>{const n=new Notification('FUL454: Usajili mpya unasubiri idhini',{body:(x.full_name||'Mtumiaji mpya')+' · '+(x.account_type==='owner'?'Mmiliki':'Dalali')+' · '+(x.email||'')+' · '+(x.phone||''),tag:'ful454-pending-'+x.user_id});n.onclick=()=>{window.focus();n.close()}});
+ }
+ localStorage.setItem(FUL454_PENDING_KEY,JSON.stringify([...new Set([...(Array.isArray(previous)?previous:[]),...ids])]));
+}
+async function enableFul454AdminNotifications(){
+ const status=$('fulNotificationStatus'),button=$('enableFulNotifications');
+ if(!('Notification' in window)){if(status)status.textContent='Browser hii haitumii notifications. Tumia Chrome ya simu.';return}
+ const permission=await Notification.requestPermission();
+ if(status)status.textContent=permission==='granted'?'Arifa zimewashwa. Acha dashboard/browser wazi ili ipokee taarifa mpya.':'Hujaruhusu arifa. Badilisha ruhusa kwenye mipangilio ya browser.';
+ if(button&&permission==='granted')button.textContent='Arifa zimewashwa';
+}
+function startFul454AdminPolling(){
+ if(fulAdminNotificationTimer)return;
+ fulAdminNotificationTimer=setInterval(()=>{
+  if(currentUser&&currentProfile?.platform_role==='eam_super_admin'&&$('superAdminStats')&&!$('superAdminStats').closest('.panel')?.classList.contains('hidden'))loadSuperAdminDashboard().catch(e=>console.warn('FUL454 notification refresh:',e));
+ },30000);
+}
 async function loadSuperAdminDashboard(){
   const stats=$('superAdminStats'),accounts=$('superAdminAccounts'),listings=$('superAdminListings');
   if(!stats||!accounts||!listings)return;
@@ -246,6 +284,8 @@ async function loadSuperAdminDashboard(){
   adminAccountCache=data||[];
   const count=t=>adminAccountCache.filter(x=>x.account_type===t).length;
   const pendingAccounts=adminAccountCache.filter(x=>['owner','agent'].includes(x.account_type)&&(x.approval_status||'pending')==='pending');
+  updateFul454AdminNotifications(pendingAccounts);
+  startFul454AdminPolling();
   stats.innerHTML='<div class="panel"><b>'+adminAccountCache.length+'</b><br>Jumla ya akaunti</div><div class="panel"><b>'+count('owner')+'</b><br>Wamiliki</div><div class="panel"><b>'+count('agent')+'</b><br>Madalali / Wakala</div><div class="panel"><b>'+count('buyer')+'</b><br>Wateja</div><div class="panel"><b>'+pendingAccounts.length+'</b><br>Maombi yanayosubiri</div>';
   const queue=$('accountApprovalQueue');
   if(queue)queue.innerHTML=pendingAccounts.map(x=>'<div class="panel"><b>'+esc(x.full_name||'Jina halijawekwa')+'</b><p>'+esc(x.email||'')+' · '+esc(x.phone||'')+'</p><p>'+esc(x.account_type==='owner'?'Mmiliki':'Dalali')+' — aliomba '+esc(new Date(x.approval_requested_at||x.created_at).toLocaleString('sw-TZ'))+'</p><div class="actions"><button onclick="setAccountApproval(\''+x.user_id+'\',\'approved\')">Nimempigia, Idhinisha</button><button class="btn-light" onclick="setAccountApproval(\''+x.user_id+'\',\'rejected\')">Kataa</button></div></div>').join('')||'<div class="notice success">Hakuna maombi mapya yanayosubiri idhini.</div>';

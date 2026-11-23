@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker from "../src/index.js";
+import { readFileSync } from "node:fs";
+import { Script } from "node:vm";
+import { fileURLToPath } from "node:url";
 
 test("health endpoint returns the FUL454 service status without caching", async () => {
   const response = await worker.fetch(new Request("https://ful454.example/health"), {
@@ -49,4 +52,19 @@ test("asset errors are not disguised as successful responses", async () => {
   });
   assert.equal(response.status, 404);
   assert.equal(await response.text(), "Not found");
+});
+
+test("all inline browser scripts parse and the listing report flow is wired", () => {
+  const htmlPath = fileURLToPath(new URL("../public/index.html", import.meta.url));
+  const html = readFileSync(htmlPath, "utf8");
+  const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)]
+    .map(match => match[1])
+    .filter(source => source.trim());
+  assert.ok(scripts.length >= 2, "expected application and language scripts");
+  scripts.forEach((source, index) => {
+    assert.doesNotThrow(() => new Script(source, { filename: `public-inline-${index + 1}.js` }));
+  });
+  assert.match(html, /submitListingReport/);
+  assert.match(html, /loadAdminReports/);
+  assert.match(html, /listing_reports/);
 });

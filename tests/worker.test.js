@@ -67,4 +67,6 @@ test("all inline browser scripts parse and the listing report flow is wired", ()
   assert.match(html, /submitListingReport/);
   assert.match(html, /loadAdminReports/);
   assert.match(html, /listing_reports/);
+  assert.match(html, /browsePagination/);
+  assert.match(html, /BROWSE_PAGE_SIZE/);
 });

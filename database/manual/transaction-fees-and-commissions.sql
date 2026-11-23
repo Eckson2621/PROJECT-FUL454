@@ -95,11 +95,13 @@ alter table public.property_deals enable row level security;
 alter table public.deal_commission_payments enable row level security;
 alter table public.deal_audit_events enable row level security;
 
+-- Least-privilege baseline. Deal writes and audit appends must be performed
+-- only by trusted server-side endpoints after participant identity checks.
 grant select, insert on public.listing_fee_payments to authenticated;
 grant update on public.listing_fee_payments to authenticated;
-grant select, insert, update on public.property_deals to authenticated;
+grant select on public.property_deals to authenticated;
 grant select on public.deal_commission_payments to authenticated;
-grant select, insert on public.deal_audit_events to authenticated;
+grant select on public.deal_audit_events to authenticated;
 
 drop policy if exists listing_fee_owner_read on public.listing_fee_payments;
 create policy listing_fee_owner_read on public.listing_fee_payments
@@ -129,36 +131,17 @@ for select to authenticated using (
   or public.is_platform_admin()
 );
 
+-- Explicitly remove unsafe direct participant writes from earlier drafts.
 drop policy if exists property_deals_advertiser_insert on public.property_deals;
-create policy property_deals_advertiser_insert on public.property_deals
-for insert to authenticated with check (
-  advertiser_id = (select auth.uid())
-  and status in ('reported','awaiting_counterparty')
-  and advertiser_confirmed_at is not null
-  and counterparty_confirmed_at is null
-  and exists (
-    select 1 from public.property_listings l
-    where l.id = listing_id and l.owner_id = (select auth.uid())
-  )
-);
-
 drop policy if exists property_deals_participant_update on public.property_deals;
-create policy property_deals_participant_update on public.property_deals
-for update to authenticated using (
-  advertiser_id = (select auth.uid())
-  or counterparty_id = (select auth.uid())
-  or public.is_platform_admin()
-) with check (
-  advertiser_id = (select auth.uid())
-  or counterparty_id = (select auth.uid())
-  or public.is_platform_admin()
-);
+revoke insert, update, delete on public.property_deals from authenticated;
 
 drop policy if exists commission_participant_read on public.deal_commission_payments;
 create policy commission_participant_read on public.deal_commission_payments
 for select to authenticated using (
   advertiser_id = (select auth.uid()) or public.is_platform_admin()
 );
+revoke insert, update, delete on public.deal_commission_payments from authenticated;
 
 drop policy if exists audit_event_participant_read on public.deal_audit_events;
 create policy audit_event_participant_read on public.deal_audit_events
@@ -170,18 +153,8 @@ for select to authenticated using (
         or public.is_platform_admin())
   )
 );
-
 drop policy if exists audit_event_participant_insert on public.deal_audit_events;
-create policy audit_event_participant_insert on public.deal_audit_events
-for insert to authenticated with check (
-  actor_id = (select auth.uid())
-  and exists (
-    select 1 from public.property_deals d where d.id = deal_id
-      and (d.advertiser_id = (select auth.uid())
-        or d.counterparty_id = (select auth.uid())
-        or public.is_platform_admin())
-  )
-);
+revoke insert, update, delete on public.deal_audit_events from authenticated;
 
 create or replace function public.prevent_deal_audit_mutation()
 returns trigger language plpgsql security invoker

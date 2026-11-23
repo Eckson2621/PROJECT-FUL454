@@ -11,45 +11,51 @@ FUL454 is a Tanzania-first property and business discovery/listing platform owne
 - Source control: GitHub
 
 ## Deploy through the existing Cloudflare Worker
-This repository is configured for a Cloudflare Worker named `ful454`, intended to serve:
+This repository is configured for a Cloudflare Worker named `ful454`:
 
 `https://ful454.eckson.workers.dev`
 
 1. In Cloudflare Dashboard open **Workers & Pages** and select the existing `ful454` Worker.
-2. Open its **Builds / Git integration** settings and confirm it is connected to `Eckson2621/PROJECT-FUL454`, production branch `main`.
-3. Set the build/deploy command to `npx wrangler@4 deploy`.
-4. Set the root directory to `/` (repository root). No separate build output directory is needed.
-5. Save and trigger a new deployment. Do not create or edit the AMWEMARI Worker.
-6. After deployment, test `https://ful454.eckson.workers.dev/health`. It should return JSON with `"ok": true`, then open the homepage.
+2. Confirm it is connected to `Eckson2621/PROJECT-FUL454`, production branch `main`.
+3. The deploy command is `npx wrangler@4 deploy`; root directory is `/`.
+4. GitHub Actions runs the Node test suite and Wrangler dry-run before deployment.
+5. After deployment, test `https://ful454.eckson.workers.dev/health`; it should return JSON with `"ok": true`.
 
 The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.js`; public site assets are in `public/`.
 
 ## Supabase project
-Project ref: `ieeyvhcluywkoymliswq` (migrated destination in Mwampaja Eckson / EAM VENTURES 1)
+- Active destination project: `ieeyvhcluywkoymliswq` (EU West, Paris).
+- Previous project ref: `bpavcqtttadzenuvvkkv` (backup; do not delete until cutover verification is complete).
 
-Previous project ref: `bpavcqtttadzenuvvkkv` (preserved as source backup; do not delete until cutover verification is complete)
-Region: EU West (Paris)
+## Implemented application capabilities
+- Public browsing of approved listings, keyword/location/type/purpose/price search and sorting.
+- Email/password signup and login; buyer, owner and agent account types.
+- Owner listing submission with contact details and up to eight JPG/PNG/WEBP photos (5 MB each).
+- Private listing-photo bucket; images are exposed through temporary signed URLs.
+- Owner listing dashboard, saved listings, search history and basic owner analytics.
+- Agent requests access to listing contacts; owner decides and administrator performs final verification.
+- Super Admin account approval/suspension, listing moderation, brokerage company approval and business reports.
+- Manual promotion payment requests with amount confirmation before a listing is featured.
+- English/Kiswahili interface.
+- RLS is enabled on all inspected public tables. Profile privilege triggers prevent users from changing their own role or approval state.
+- The active Super Admin profile is assigned to the configured administrator account.
 
-The database contains the core profiles, property listings, listing photos, contacts, agent access requests, listing payments and audit logs tables.
+## Security and performance work completed (23 Nov 2026)
+- Confirmed the active Supabase project is healthy and all 14 inspected public tables have RLS enabled.
+- Confirmed the listing-photo bucket is private and restricts uploads to JPG, PNG and WEBP up to 5 MB.
+- Added indexes for 11 previously unindexed foreign-key columns; the performance advisor no longer reports unindexed foreign keys.
+- Added baseline security headers to both health and static-asset responses, including HSTS, anti-framing, MIME-sniffing protection, referrer policy and a restrictive permissions policy.
+- Added automated Node tests for the Worker health endpoint, security headers, asset response preservation and 404 handling; the deployment workflow now runs these tests before deploying.
 
-## Current application capabilities
-- Public browsing of approved listings
-- Search by keyword, region, property type, purpose and price
-- Email/password sign-up and login
-- Buyer, owner and agent account selection
-- Owner listing submission with contact details and up to eight JPG/PNG/WEBP photos (5 MB each)
-- Listing images are kept in a private bucket and served using temporary signed URLs only for approved listings
-- Owner listing status view
-- Agent requests permission to view listing contact details
-- Owner reviews agent requests; platform admin verifies owner-approved requests
-- Basic platform-admin listing review interface (requires an authorized admin profile)
+## Remaining before a public launch
+- Enable leaked-password protection in Supabase Auth.
+- Complete manual review of the two admin-only SECURITY DEFINER RPC functions and their guarded authorization paths; they currently enforce platform-admin checks.
+- Run real signup, email confirmation, login, owner listing/photo upload, approval and agent-access tests with separate test accounts.
+- Verify Supabase Auth redirect URLs and the deployed Worker health endpoint in a real browser.
+- Finish fraud/reporting workflow, full pagination, listing expiry/renewal rules and broader admin user-management QA.
+- Test mobile layouts on real Android/iOS devices and verify all bilingual labels.
+- Confirm Storage object policies and all RLS edge cases with unauthorised accounts.
 
-## Important work still required before public launch
-- Verify the Cloudflare Worker deployment and Supabase Auth redirect URLs.
-- Test signup, email confirmation, login, owner listing submission, photo uploads and admin approval end-to-end.
-- End-to-end test the agent request → owner decision → administrator verification flow.
-- Complete payment plans, payment verification, listing expiry and admin user management.
-- Review all database RLS and Storage policies and run production security checks.
-- Add full listing detail pages, report/fraud workflow, pagination and mobile QA.
-
-Never put a Supabase service-role key or secret key in this repository or browser code. The frontend uses only the publishable key.
+## Local checks
+- Run `npm test` to execute the Worker tests.
+- Never put a Supabase service-role key or secret key in this repository or browser code. The frontend uses only the publishable key.

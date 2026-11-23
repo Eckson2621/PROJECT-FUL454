@@ -60,3 +60,6 @@ create index if not exists listing_reports_reporter_id_idx
   on public.listing_reports(reporter_id);
 create index if not exists listing_reports_status_created_at_idx
   on public.listing_reports(status, created_at desc);
+
+create index if not exists listing_reports_reviewed_by_idx
+  on public.listing_reports(reviewed_by);

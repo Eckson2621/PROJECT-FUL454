@@ -37,6 +37,7 @@ The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.j
 - Super Admin account approval/suspension, listing moderation, brokerage company approval and business reports.
 - Manual promotion payment requests with amount confirmation before a listing is featured.
 - English/Kiswahili interface.
+- Listing fraud/report workflow: signed-in users can report an approved listing; only platform admins can review, resolve or reject reports.
 - RLS is enabled on all inspected public tables. Profile privilege triggers prevent users from changing their own role or approval state.
 - The active Super Admin profile is assigned to the configured administrator account.
 
@@ -44,6 +45,7 @@ The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.j
 - Confirmed the active Supabase project is healthy and all 14 inspected public tables have RLS enabled.
 - Confirmed the listing-photo bucket is private and restricts uploads to JPG, PNG and WEBP up to 5 MB.
 - Added indexes for 11 previously unindexed foreign-key columns; the performance advisor no longer reports unindexed foreign keys.
+- Added an RLS-protected `listing_reports` table, reporter/admin access rules and a dashboard moderation queue. SQL is documented in `database/manual/listing-reports.sql`.
 - Added baseline security headers to both health and static-asset responses, including HSTS, anti-framing, MIME-sniffing protection, referrer policy and a restrictive permissions policy.
 - Added automated Node tests for the Worker health endpoint, security headers, asset response preservation and 404 handling; the deployment workflow now runs these tests before deploying.
 
@@ -52,7 +54,8 @@ The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.j
 - Complete manual review of the two admin-only SECURITY DEFINER RPC functions and their guarded authorization paths; they currently enforce platform-admin checks.
 - Run real signup, email confirmation, login, owner listing/photo upload, approval and agent-access tests with separate test accounts.
 - Verify Supabase Auth redirect URLs and the deployed Worker health endpoint in a real browser.
-- Finish fraud/reporting workflow, full pagination, listing expiry/renewal rules and broader admin user-management QA.
+- Complete full pagination, listing expiry/renewal rules and broader admin user-management QA.
+- Exercise the listing-report workflow using separate reporter and administrator accounts.
 - Test mobile layouts on real Android/iOS devices and verify all bilingual labels.
 - Confirm Storage object policies and all RLS edge cases with unauthorised accounts.
 

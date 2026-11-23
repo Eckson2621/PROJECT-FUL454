@@ -28,7 +28,7 @@ The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.j
 - Previous project ref: `bpavcqtttadzenuvvkkv` (backup; do not delete until cutover verification is complete).
 
 ## Implemented application capabilities
-- Public browsing of approved listings, keyword/location/type/purpose/price search and sorting.
+- Public browsing of approved listings, keyword/location/type/purpose/price search, sorting and paginated results (24 per page).
 - Email/password signup and login; buyer, owner and agent account types.
 - Owner listing submission with contact details and up to eight JPG/PNG/WEBP photos (5 MB each).
 - Private listing-photo bucket; images are exposed through temporary signed URLs.
@@ -54,7 +54,7 @@ The Worker configuration is in `wrangler.jsonc`; its entry point is `src/index.j
 - Complete manual review of the two admin-only SECURITY DEFINER RPC functions and their guarded authorization paths; they currently enforce platform-admin checks.
 - Run real signup, email confirmation, login, owner listing/photo upload, approval and agent-access tests with separate test accounts.
 - Verify Supabase Auth redirect URLs and the deployed Worker health endpoint in a real browser.
-- Complete full pagination, listing expiry/renewal rules and broader admin user-management QA.
+- Finalise listing expiry/renewal rules and broader admin user-management QA.
 - Exercise the listing-report workflow using separate reporter and administrator accounts.
 - Test mobile layouts on real Android/iOS devices and verify all bilingual labels.
 - Confirm Storage object policies and all RLS edge cases with unauthorised accounts.

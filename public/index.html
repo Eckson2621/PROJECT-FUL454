@@ -734,7 +734,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
   admin:{title:'Super Admin',items:['Kagua na idhinisha au simamisha akaunti kulingana na ushahidi.','Kagua matangazo na ripoti za udanganyifu.','Simamia maombi ya mawakala na matangazo yaliyopandishwa.','Tumia ripoti za dashibodi kufuatilia shughuli za mfumo.']}
  };
  function show(){
-  const p=window.currentProfile||{},type=p.platform_role==='eam_super_admin'?'admin':(p.account_type||'guest');
+  const p=typeof currentProfile!=='undefined'&&currentProfile?currentProfile:{},type=p.platform_role==='eam_super_admin'?'admin':(p.account_type||'guest');
   const g=help[type]||help.guest;
   document.getElementById('fulHelpTitle').textContent='Msaada / Help Centre';
   document.getElementById('fulHelpRole').textContent=g.title;

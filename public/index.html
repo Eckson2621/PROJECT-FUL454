@@ -713,4 +713,38 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
 })();
 </script>
 
+
+<style>
+#fulHelpBtn{position:fixed;right:16px;bottom:18px;z-index:9998;border:0;border-radius:999px;padding:13px 18px;background:#12634a;color:#fff;font-weight:800;box-shadow:0 8px 26px #102b2535}
+#fulHelpLayer{position:fixed;inset:0;z-index:9999;background:#071d17aa;display:none;align-items:center;justify-content:center;padding:14px}
+#fulHelpLayer.open{display:flex}#fulHelpCard{width:min(100%,620px);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;padding:20px;color:#172b24}
+#fulHelpCard h2{margin:0 0 8px}#fulHelpCard li,#fulHelpCard p{line-height:1.6}#fulHelpClose{float:right;background:#eaf3ed;color:#176b50}
+</style>
+<button id="fulHelpBtn" type="button" aria-haspopup="dialog" aria-controls="fulHelpLayer">Msaada / Help</button>
+<div id="fulHelpLayer" role="dialog" aria-modal="true" aria-labelledby="fulHelpTitle">
+ <div id="fulHelpCard"><button id="fulHelpClose" type="button">Funga</button><h2 id="fulHelpTitle">Msaada wa FUL454</h2><p id="fulHelpRole"></p><div id="fulHelpBody"></div><p><b>Unahitaji msaada?</b> Piga simu 0613794448 au WhatsApp.</p><a href="tel:0613794448">Piga simu</a> · <a href="https://wa.me/255613794448" target="_blank" rel="noopener noreferrer">WhatsApp</a></div>
+</div>
+<script>
+(function(){
+ const help={
+  guest:{title:'Mgeni / New user',items:['Tafuta nyumba, viwanja au biashara kwa eneo, aina na bei.','Fungua akaunti ili kuhifadhi matangazo na kutumia huduma za akaunti.','Chagua tangazo kusoma maelezo na kuwasiliana na mwenye mali.']},
+  buyer:{title:'Mnunuzi / Mpangaji',items:['Tafuta mali kwa eneo, bei na aina ya tangazo.','Fungua tangazo uone picha na maelezo; wasiliana moja kwa moja na mtoa tangazo.','Hifadhi matangazo unayopenda na angalia historia ya utafutaji.','Ripoti tangazo linalotia shaka. Usitume fedha kupitia FUL454; mfumo haushikilii fedha za mauziano.']},
+  owner:{title:'Mmiliki wa Mali',items:['Jaza wasifu wako na taarifa sahihi za mawasiliano.','Tumia sehemu ya matangazo kuongeza mali, picha na bei.','Fuatilia matangazo yako na maombi ya mawasiliano kwenye dashibodi.','Idhini ya akaunti au tangazo ikisubiri, fuatilia hali kwenye dashibodi. Malipo ya matangazo yaliyopandishwa hufuata maelekezo yanayoonyeshwa.']},
+  agent:{title:'Dalali / Agent',items:['Jaza wasifu na taarifa za kampuni au leseni pale inapohitajika.','Tangaza mali kwa ruhusa ya mwenye mali.','Omba ruhusa ya kuona mawasiliano ya tangazo; usitumie taarifa bila idhini.','Fuatilia hali ya ombi lako kwenye dashibodi.']},
+  admin:{title:'Super Admin',items:['Kagua na idhinisha au simamisha akaunti kulingana na ushahidi.','Kagua matangazo na ripoti za udanganyifu.','Simamia maombi ya mawakala na matangazo yaliyopandishwa.','Tumia ripoti za dashibodi kufuatilia shughuli za mfumo.']}
+ };
+ function show(){
+  const p=window.currentProfile||{},type=p.platform_role==='eam_super_admin'?'admin':(p.account_type||'guest');
+  const g=help[type]||help.guest;
+  document.getElementById('fulHelpTitle').textContent='Msaada / Help Centre';
+  document.getElementById('fulHelpRole').textContent=g.title;
+  document.getElementById('fulHelpBody').innerHTML='<ol>'+g.items.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  document.getElementById('fulHelpLayer').classList.add('open');
+ }
+ document.getElementById('fulHelpBtn').addEventListener('click',show);
+ document.getElementById('fulHelpClose').addEventListener('click',()=>document.getElementById('fulHelpLayer').classList.remove('open'));
+ document.getElementById('fulHelpLayer').addEventListener('click',e=>{if(e.target.id==='fulHelpLayer')e.currentTarget.classList.remove('open')});
+})();
+</script>
+
 </body></html>

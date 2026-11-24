@@ -254,6 +254,7 @@ async function requestAgentAccess(listingId,ownerId){if(!currentUser){alert('Ing
 async function loadDashboard(){
 if(!currentUser){$('dashboardContent').innerHTML='<div class="panel">Tafadhali ingia kwanza. <button onclick="openAuth()">Ingia</button></div>';return}
 await ensureProfile();
+try{const helpKey='ful454_help_seen_v1_'+currentUser.id;if(!localStorage.getItem(helpKey)){localStorage.setItem(helpKey,'1');setTimeout(()=>document.getElementById('fulHelpBtn')?.click(),350)}}catch(e){}
 const status=currentProfile?.approval_status||'pending';
 const statusNames={pending:'Inasubiri uthibitisho wa Super Admin',approved:'Imethibitishwa',rejected:'Ombi limekataliwa',suspended:'Akaunti imesitishwa'};
 $('who').textContent=(currentProfile?.full_name||currentUser.email)+' · '+(currentProfile?.account_type||'akaunti');

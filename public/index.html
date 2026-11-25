@@ -153,6 +153,7 @@ footer{background:linear-gradient(105deg,#171744,#4935a8 60%,#176d83);color:#e2e
 .owner-analytics .analytics-empty{padding:14px;border-radius:12px;background:#f4f3ff;color:#666887;font-size:13px}
 @media(max-width:700px){.owner-analytics{grid-template-columns:1fr}}
 
+body.ful-authenticated-workspace>header>.brand{display:none!important}
 </style><link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
 <meta name="application-name" content="FUL454">
@@ -195,7 +196,7 @@ function toggleSaved(id){let ids=savedIds();ids=ids.includes(id)?ids.filter(x=>x
 async function showSavedListings(){showView('browse');let ids=savedIds();if(!ids.length){$('browseListings').innerHTML='<div class="panel">Bado hujahifadhi tangazo lolote. Bonyeza ☆ Hifadhi kwenye tangazo unalolipenda.</div>';return}let {data,error}=await sb.from('property_listings').select('*,listing_photos(storage_path,sort_order)').eq('status','approved').in('id',ids);if(error){$('browseListings').innerHTML='<div class="panel">'+esc(error.message)+'</div>';return}let out=[];for(let l of data||[]){let p=(l.listing_photos||[]).sort((a,b)=>a.sort_order-b.sort_order)[0],url=null;if(p){let {data:u,error:photoError}=await sb.storage.from('ful454-listing-photos').createSignedUrl(p.storage_path,3600);if(!photoError)url=u?.signedUrl||null}out.push(card(l,url))}$('browseListings').innerHTML=out.join('')||'<div class="panel">Matangazo uliyohifadhi hayapo tena au yameondolewa.</div>'}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function chooseCategory(t){$('type').value=t;$('bt').value=t;showView('browse');$('bt').value=t;searchListings(true)}
-function showView(v){['home','browse','dashboard','auth'].forEach(x=>$(x+'View').classList.toggle('hidden',x!==v));if(v==='dashboard')loadDashboard();if(v==='browse')searchListings(true);window.scrollTo({top:0,behavior:'smooth'})}
+function showView(v){['home','browse','dashboard','auth'].forEach(x=>$(x+'View').classList.toggle('hidden',x!==v));document.body.classList.toggle('ful-authenticated-workspace',!!currentUser&&v==='dashboard');if(v==='dashboard')loadDashboard();if(v==='browse')searchListings(true);window.scrollTo({top:0,behavior:'smooth'})}
 function openAuth(){toggleAuth(false);showView('auth')}
 function toggleAuth(reg){$('loginForm').classList.toggle('hidden',reg);$('signupForm').classList.toggle('hidden',!reg);$('authTitle').textContent=reg?'Fungua akaunti':'Ingia FUL454';$('authMessage').innerHTML=''}
 function message(t,ok=false){$('authMessage').innerHTML='<div class="notice '+(ok?'success':'')+'">'+esc(t)+'</div>'}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ful454-pwa-shell-v2';
+const CACHE_NAME = 'ful454-pwa-shell-v3';
 const CORE = ['/', '/manifest.webmanifest', '/icons/icon.svg', '/icons/logo.svg'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
@@ -12,7 +12,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.endsWith('-pwa-shell-v1') && key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => key.startsWith('ful454-pwa-shell-') && key !== CACHE_NAME).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });

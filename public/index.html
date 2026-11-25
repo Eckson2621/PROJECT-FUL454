@@ -153,7 +153,11 @@ footer{background:linear-gradient(105deg,#171744,#4935a8 60%,#176d83);color:#e2e
 .owner-analytics .analytics-empty{padding:14px;border-radius:12px;background:#f4f3ff;color:#666887;font-size:13px}
 @media(max-width:700px){.owner-analytics{grid-template-columns:1fr}}
 
-</style></head><body><div id="fulActionToast" role="status" aria-live="polite"></div>
+</style><link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<meta name="application-name" content="FUL454">
+<script src="/pwa-install.js" defer></script>
+</head><body><div id="fulActionToast" role="status" aria-live="polite"></div>
 <header><div class="brand">FUL<span>454</span></div><nav><button onclick="showView('home')">Nyumbani</button><button onclick="showView('browse')">Tafuta</button><button onclick="showView('dashboard')">Dashibodi</button><button onclick="openAuth()">Ingia / Jisajili</button><button class="btn-light" id="languageToggle" onclick="toggleLanguage()">EN</button></nav></header>
 <main class="wrap">
 <section id="homeView"><div class="hero"><div><div class="eyebrow">FIND. DISCOVER. CONNECT.</div><h1>Mahali sahihi pa kuanza kutafuta.</h1><p>Gundua nyumba, vyumba, viwanja, majengo ya biashara na biashara zinazotangazwa. Tanzania kwanza — dunia nzima mbele.</p><div class="actions"><button onclick="showView('browse')">Anza kutafuta</button><button class="btn-light" onclick="openAuth()">Weka tangazo</button></div></div><div class="hero-art">⌂</div></div>

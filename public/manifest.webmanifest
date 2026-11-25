@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "FUL454 Property Marketplace",
+  "short_name": "FUL454",
+  "description": "FUL454 Property Marketplace — official web app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#102b25",
+  "theme_color": "#102b25",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

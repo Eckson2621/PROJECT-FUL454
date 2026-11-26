@@ -4,19 +4,87 @@
   const BG = "#102b25";
   const boot = () => {
     if ('serviceWorker' in navigator && location.protocol === 'https:') {
-      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(registration => {
+      const UPDATE_API = "https://pzgnnjwmwylkmikcxwmf.supabase.co/functions/v1/feedback-center";
+      const UPDATE_KEY = "sb_publishable_1jZy2d-qVJOiCZvHoB6-ow_AytoxBA2";
+      let registration = null;
+      let approvedUpdate = false;
+      let deferredVersion = null;
+      const showUpdatePrompt = async () => {
+        if (!registration || !registration.waiting || !navigator.serviceWorker.controller ||
+            document.getElementById('eam-app-update-prompt')) return;
+        let release = null;
+        try {
+          const response = await fetch(UPDATE_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': UPDATE_KEY },
+            body: JSON.stringify({ action: 'release_list', app_name: 'PROJECT FUL454' })
+          });
+          if (!response.ok) return;
+          const data = await response.json();
+          release = data && data.release;
+        } catch (_) { return; }
+        if (!release || deferredVersion === release.version) return;
+        const box = document.createElement('aside');
+        box.id = 'eam-app-update-prompt';
+        box.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:2147483002;width:min(92vw,350px);box-sizing:border-box;background:#f0f8e8;color:#17372b;border:1px solid #b5d68a;border-radius:14px;padding:15px;box-shadow:0 12px 34px #0004;font:14px/1.45 system-ui';
+        const heading = document.createElement('strong');
+        heading.textContent = 'Update mpya inapatikana' + (release.version ? ' · ' + release.version : '');
+        heading.style.cssText = 'display:block;font-size:15px;margin-bottom:5px';
+        const title = document.createElement('div');
+        title.textContent = release.title || 'Toleo jipya la mfumo limeandaliwa.';
+        const notes = document.createElement('small');
+        notes.textContent = release.release_notes || '';
+        notes.style.cssText = 'display:block;margin-top:6px;white-space:pre-wrap';
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;gap:8px;margin-top:12px';
+        const update = document.createElement('button');
+        update.type = 'button'; update.textContent = 'Update';
+        update.style.cssText = 'border:0;border-radius:9px;padding:10px 14px;background:#176b50;color:white;font-weight:700';
+        const later = document.createElement('button');
+        later.type = 'button'; later.textContent = 'Baadaye';
+        later.style.cssText = 'border:0;border-radius:9px;padding:10px 14px;background:#e4efdc;color:#17372b';
+        actions.append(update, later);
+        box.append(heading, title);
+        if (notes.textContent) box.append(notes);
+        box.append(actions);
+        document.body.appendChild(box);
+        later.addEventListener('click', () => {
+          deferredVersion = release.version || 'current';
+          box.remove();
+        });
+        update.addEventListener('click', () => {
+          if (!registration || !registration.waiting) {
+            box.remove();
+            return;
+          }
+          if (!window.confirm('Unataka kusasisha FUL454 sasa? Hifadhi kwanza taarifa zozote ulizokuwa unaingiza.')) return;
+          approvedUpdate = true;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (approvedUpdate) window.location.reload();
+          }, { once: true });
+          update.disabled = true;
+          update.textContent = 'Inasasisha...';
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        });
+      };
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(async reg => {
+        registration = reg;
         const checkForUpdates = () => registration.update().catch(() => {});
         checkForUpdates();
+        await showUpdatePrompt();
+        registration.addEventListener('updatefound', () => {
+          const worker = registration.installing;
+          if (!worker) return;
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdatePrompt();
+          });
+        });
         window.addEventListener('online', checkForUpdates);
         document.addEventListener('visibilitychange', () => {
           if (!document.hidden) {
-            if (window.__eamPwaUpdatePending) { window.location.reload(); return; }
             checkForUpdates();
+            showUpdatePrompt();
           }
-        });
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          // Finish the current action first; refresh automatically on the next app foreground.
-          window.__eamPwaUpdatePending = true;
         });
       }).catch(error => console.warn(APP_NAME + ' service worker:', error));
     }

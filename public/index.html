@@ -803,6 +803,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||nul
   }catch(error){console.warn(APP+" update check:",error);}
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&registration&&registration.waiting)showIfWaiting();});
 })();
 </script>
 </body></html>
